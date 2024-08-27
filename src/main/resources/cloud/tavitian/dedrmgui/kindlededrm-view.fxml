@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2024 Paul Tavitian.
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20.0"
+      fx:controller="cloud.tavitian.dedrmgui.KindleDeDRMController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+    </padding>
+
+    <HBox fx:id="ebookFileHbox" spacing="20.0" alignment="CENTER">
+        <Label fx:id="ebookFileLabel" text="eBook File"/>
+        <TextField fx:id="ebookFileTextField"/>
+        <Button fx:id="ebookFileButton" text="Browse" onAction="#selectEbookFile"/>
+    </HBox>
+
+    <HBox fx:id="outputDirHbox" spacing="20.0" alignment="CENTER">
+        <Label fx:id="outputDirLabel" text="Output Directory"/>
+        <TextField fx:id="outputDirTextField"/>
+        <Button fx:id="outputDirButton" text="Browse" onAction="#selectOutputDir"/>
+    </HBox>
+
+    <HBox fx:id="keyFileHbox" spacing="20.0" alignment="CENTER">
+        <Label fx:id="keyFileLabel" text="Key File"/>
+        <TextField fx:id="keyFileTextField"/>
+        <Button fx:id="keyFileButton" text="Browse" onAction="#selectKeyFile"/>
+    </HBox>
+
+    <HBox fx:id="serialHbox" spacing="20.0" alignment="CENTER">
+        <Label fx:id="serialLabel" text="Serial Number"/>
+        <TextField fx:id="serialTextField"/>
+    </HBox>
+
+    <Button fx:id="decryptButton" text="Decrypt" onAction="#decryptBook"/>
+</VBox>
