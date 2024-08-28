@@ -18,7 +18,7 @@ import javafx.stage.FileChooser;
 
 import java.io.File;
 
-public class KindleDeDRMController extends VBox {
+public final class KindleDeDRMController extends VBox {
     private final HBox decryptHbox;
     private final CheckBox debugCheckBox;
     private final HBox ebookFileHbox;
@@ -151,6 +151,11 @@ public class KindleDeDRMController extends VBox {
         String infile = ebookFileTextField.getText();
         String outdir = outputDirTextField.getText();
         String keyfile = keyFileTextField.getText();
+
+        System.out.println("Serial: " + serial);
+        System.out.println("Input File: " + infile);
+        System.out.println("Output Directory: " + outdir);
+        System.out.println("Key File: " + keyfile);
 
         Debug.setDebug(debugCheckBox.isSelected());
 
