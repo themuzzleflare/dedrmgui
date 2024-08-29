@@ -6,20 +6,25 @@ package cloud.tavitian.dedrmgui;
 
 import cloud.tavitian.dedrmtools.DeDRM;
 import cloud.tavitian.dedrmtools.Debug;
+import com.google.gson.Gson;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 
-public final class KindleDeDRMController extends VBox {
-    private final HBox decryptHbox;
+final class KindleDeDRMController extends VBox {
+    private static final Gson gson = new Gson();
+
+    private final TextAreaPrintStream printStream;
+
+    private final HBox decryptDebugHbox;
     private final CheckBox debugCheckBox;
     private final HBox ebookFileHbox;
     private final Label ebookFileLabel;
@@ -37,6 +42,16 @@ public final class KindleDeDRMController extends VBox {
     private final Label serialLabel;
     private final TextField serialTextField;
     private final Button decryptButton;
+    private final TextArea textArea;
+    private final HBox settingsHbox;
+    private final Button saveSettingsButton;
+    private final Button loadSettingsButton;
+    private final VBox inputOutputVbox;
+    private final VBox keySerialVbox;
+    private final Button clearLogsButton;
+    private final VBox logDecryptVbox;
+    private final HBox decryptHbox;
+    private final Button resetButton;
 
     public KindleDeDRMController() {
         ebookFileLabel = new Label("eBook File:");
@@ -45,7 +60,7 @@ public final class KindleDeDRMController extends VBox {
         ebookFileTextField.setPromptText("eBook File");
 
         ebookFileButton = new Button("Select");
-        ebookFileButton.setOnAction(event -> selectEbookFile());
+        ebookFileButton.setOnAction(_ -> selectEbookFile());
 
         ebookFileHbox = new HBox(5.0, ebookFileLabel, ebookFileTextField, ebookFileButton);
         ebookFileHbox.setAlignment(Pos.CENTER);
@@ -56,10 +71,13 @@ public final class KindleDeDRMController extends VBox {
         outputDirTextField.setPromptText("Output Directory");
 
         outputDirButton = new Button("Select");
-        outputDirButton.setOnAction(event -> selectOutputDir());
+        outputDirButton.setOnAction(_ -> selectOutputDir());
 
         outputDirHbox = new HBox(5.0, outputDirLabel, outputDirTextField, outputDirButton);
         outputDirHbox.setAlignment(Pos.CENTER);
+
+        inputOutputVbox = new VBox(5.0, ebookFileHbox, outputDirHbox);
+        inputOutputVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
 
         keyFileLabel = new Label("Key File:");
 
@@ -67,7 +85,7 @@ public final class KindleDeDRMController extends VBox {
         keyFileTextField.setPromptText(".k4i File");
 
         keyFileButton = new Button("Select");
-        keyFileButton.setOnAction(event -> selectKeyFile());
+        keyFileButton.setOnAction(_ -> selectKeyFile());
 
         keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton);
         keyFileHbox.setAlignment(Pos.CENTER);
@@ -80,8 +98,23 @@ public final class KindleDeDRMController extends VBox {
         serialHbox = new HBox(5.0, serialLabel, serialTextField);
         serialHbox.setAlignment(Pos.CENTER);
 
+        keySerialVbox = new VBox(5.0, keyFileHbox, serialHbox);
+        keySerialVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
+
+        saveSettingsButton = new Button("Save Settings");
+        saveSettingsButton.setOnAction(_ -> saveSettings());
+
+        loadSettingsButton = new Button("Load Settings");
+        loadSettingsButton.setOnAction(_ -> loadSettings());
+
+        resetButton = new Button("Reset");
+        resetButton.setOnAction(_ -> resetSettings());
+
+        settingsHbox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetButton);
+        settingsHbox.setAlignment(Pos.CENTER);
+
         decryptButton = new Button("Decrypt");
-        decryptButton.setOnAction(event -> decryptBook());
+        decryptButton.setOnAction(_ -> decryptBook());
 
         decryptButton.disableProperty().bind(
                 ebookFileTextField.textProperty().isEmpty().or(
@@ -93,15 +126,34 @@ public final class KindleDeDRMController extends VBox {
                 )
         );
 
-        debugCheckBox = new CheckBox("Debug");
+        textArea = new TextArea();
+        textArea.setEditable(false);
 
-        decryptHbox = new HBox(5.0, decryptButton, debugCheckBox);
+        debugCheckBox = new CheckBox("Verbose");
+        debugCheckBox.setOnAction(_ -> Debug.setEnabled(debugCheckBox.isSelected()));
+
+        clearLogsButton = new Button("Clear Logs");
+        clearLogsButton.setOnAction(_ -> clearLogs());
+
+        decryptDebugHbox = new HBox(5.0, decryptButton, debugCheckBox);
+        decryptDebugHbox.setAlignment(Pos.CENTER);
+
+        HBox.setHgrow(decryptDebugHbox, Priority.ALWAYS);
+
+        decryptHbox = new HBox(5.0, decryptDebugHbox, clearLogsButton);
         decryptHbox.setAlignment(Pos.CENTER);
 
-        setSpacing(20.0);
-        setAlignment(Pos.CENTER);
+        logDecryptVbox = new VBox(5.0, textArea, decryptHbox);
 
-        getChildren().addAll(ebookFileHbox, outputDirHbox, keyFileHbox, serialHbox, decryptHbox);
+        setSpacing(20.0);
+        setPadding(new Insets(10.0));
+
+        getChildren().addAll(inputOutputVbox, keySerialVbox, settingsHbox, logDecryptVbox);
+
+        printStream = new TextAreaPrintStream(textArea);
+
+        System.setOut(printStream);
+        System.setErr(printStream);
     }
 
 
@@ -145,6 +197,63 @@ public final class KindleDeDRMController extends VBox {
         if (keyFile != null) keyFileTextField.setText(keyFile.toString());
     }
 
+    private void saveSettings() {
+        SettingsDict settings = new SettingsDict();
+        settings.setInputFile(ebookFileTextField.getText());
+        settings.setOutputFile(outputDirTextField.getText());
+        settings.setKeyFile(keyFileTextField.getText());
+        settings.setSerial(serialTextField.getText());
+
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".json Files", "*.json");
+        fileChooser.getExtensionFilters().add(filter);
+
+        fileChooser.setTitle("Save Settings File");
+
+        File settingsFile = fileChooser.showSaveDialog(saveSettingsButton.getScene().getWindow());
+
+        if (settingsFile != null) {
+            try (FileWriter writer = new FileWriter(settingsFile)) {
+                gson.toJson(settings, writer);
+            } catch (Exception e) {
+                System.err.println("Error saving settings file: " + e.getMessage());
+                return;
+            }
+
+            System.out.println("Saved settings to: " + settingsFile);
+        }
+    }
+
+    private void loadSettings() {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".json Files", "*.json");
+        fileChooser.getExtensionFilters().add(filter);
+        fileChooser.setTitle("Select Settings File");
+
+        File settingsFile = fileChooser.showOpenDialog(loadSettingsButton.getScene().getWindow());
+
+        if (settingsFile != null) {
+            try (FileReader reader = new FileReader(settingsFile)) {
+                SettingsDict settings = gson.fromJson(reader, SettingsDict.class);
+                ebookFileTextField.setText(settings.getInputFile());
+                outputDirTextField.setText(settings.getOutputFile());
+                keyFileTextField.setText(settings.getKeyFile());
+                serialTextField.setText(settings.getSerial());
+            } catch (Exception e) {
+                System.err.println("Error loading settings file: " + e.getMessage());
+                return;
+            }
+
+            System.out.println("Loaded settings from: " + settingsFile);
+        }
+    }
+
+    private void resetSettings() {
+        ebookFileTextField.clear();
+        outputDirTextField.clear();
+        keyFileTextField.clear();
+        serialTextField.clear();
+    }
 
     private void decryptBook() {
         String serial = serialTextField.getText();
@@ -152,13 +261,15 @@ public final class KindleDeDRMController extends VBox {
         String outdir = outputDirTextField.getText();
         String keyfile = keyFileTextField.getText();
 
-        System.out.println("Serial: " + serial);
-        System.out.println("Input File: " + infile);
-        System.out.println("Output Directory: " + outdir);
-        System.out.println("Key File: " + keyfile);
-
-        Debug.setDebug(debugCheckBox.isSelected());
+        Debug.println("Serial: " + serial);
+        Debug.println("Input File: " + infile);
+        Debug.println("Output Directory: " + outdir);
+        Debug.println("Key File: " + keyfile);
 
         DeDRM.decryptBookWithKDatabaseAndSerial(infile, outdir, keyfile, serial);
+    }
+
+    private void clearLogs() {
+        textArea.clear();
     }
 }

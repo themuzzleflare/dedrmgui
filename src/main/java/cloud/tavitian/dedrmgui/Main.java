@@ -15,8 +15,9 @@ public final class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        Scene scene = new Scene(new KindleDeDRMController(), 1000, 1000);
-        stage.setTitle("KindleDeDRM");
+        Scene scene = new Scene(new KindleDeDRMController());
+        stage.setTitle("Kindle DeDRM");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
