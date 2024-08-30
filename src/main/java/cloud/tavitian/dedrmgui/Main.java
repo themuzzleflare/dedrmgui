@@ -17,7 +17,6 @@ public final class Main extends Application {
     public void start(Stage stage) {
         Scene scene = new Scene(new KindleDeDRMController());
         stage.setTitle("Kindle DeDRM");
-        stage.setResizable(false);
         stage.setScene(scene);
         stage.show();
     }
