@@ -6,6 +6,7 @@ package cloud.tavitian.dedrmgui;
 
 import cloud.tavitian.dedrmtools.DeDRM;
 import cloud.tavitian.dedrmtools.Debug;
+import cloud.tavitian.dedrmtools.kindlekeys.KindleKey;
 import com.google.gson.Gson;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -52,6 +53,7 @@ final class KindleDeDRMController extends VBox {
     private final VBox logDecryptVbox;
     private final HBox decryptHbox;
     private final Button resetButton;
+    private final Button generateK4iButton;
 
     public KindleDeDRMController() {
         ebookFileLabel = new Label("eBook File:");
@@ -87,7 +89,10 @@ final class KindleDeDRMController extends VBox {
         keyFileButton = new Button("Select");
         keyFileButton.setOnAction(_ -> selectKeyFile());
 
-        keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton);
+        generateK4iButton = new Button("Generate");
+        generateK4iButton.setOnAction(_ -> generateKeyFile());
+
+        keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton, generateK4iButton);
         keyFileHbox.setAlignment(Pos.CENTER);
 
         serialLabel = new Label("Serial:");
@@ -197,6 +202,24 @@ final class KindleDeDRMController extends VBox {
         if (keyFile != null) keyFileTextField.setText(keyFile.toString());
     }
 
+    private void generateKeyFile() {
+        FileChooser fileChooser = new FileChooser();
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
+        fileChooser.getExtensionFilters().add(filter);
+        fileChooser.setTitle("Generate Key File");
+
+        File keyFile = fileChooser.showSaveDialog(generateK4iButton.getScene().getWindow());
+
+        if (keyFile != null) {
+            KindleKey instance = KindleKey.getInstance();
+
+            if (instance.getKey(keyFile.toString())) {
+                keyFileTextField.setText(keyFile.toString());
+                System.out.printf("Generated key file: %s%n", keyFile);
+            } else System.err.println("Error generating key file");
+        }
+    }
+
     private void saveSettings() {
         SettingsDict settings = new SettingsDict();
         settings.setInputFile(ebookFileTextField.getText());
@@ -216,11 +239,11 @@ final class KindleDeDRMController extends VBox {
             try (FileWriter writer = new FileWriter(settingsFile)) {
                 gson.toJson(settings, writer);
             } catch (Exception e) {
-                System.err.println("Error saving settings file: " + e.getMessage());
+                System.err.printf("Error saving settings file: %s%n", e.getMessage());
                 return;
             }
 
-            System.out.println("Saved settings to: " + settingsFile);
+            System.out.printf("Saved settings to: %s%n", settingsFile);
         }
     }
 
