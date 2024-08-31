@@ -13,8 +13,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 
 import java.io.File;
 import java.io.FileReader;
@@ -54,6 +56,8 @@ final class KindleDeDRMController extends VBox {
     private final HBox decryptHbox;
     private final Button resetButton;
     private final Button generateK4iButton;
+    private final Label keyOrSerialRequiredLabel;
+    private final Button deriveOutputDirButton;
 
     public KindleDeDRMController() {
         ebookFileLabel = new Label("eBook File:");
@@ -75,7 +79,12 @@ final class KindleDeDRMController extends VBox {
         outputDirButton = new Button("Select");
         outputDirButton.setOnAction(_ -> selectOutputDir());
 
-        outputDirHbox = new HBox(5.0, outputDirLabel, outputDirTextField, outputDirButton);
+        deriveOutputDirButton = new Button("Derive");
+        deriveOutputDirButton.setOnAction(_ -> deriveOutputDir());
+
+        deriveOutputDirButton.disableProperty().bind(ebookFileTextField.textProperty().isEmpty());
+
+        outputDirHbox = new HBox(5.0, outputDirLabel, outputDirTextField, outputDirButton, deriveOutputDirButton);
         outputDirHbox.setAlignment(Pos.CENTER);
 
         inputOutputVbox = new VBox(5.0, ebookFileHbox, outputDirHbox);
@@ -90,6 +99,12 @@ final class KindleDeDRMController extends VBox {
         keyFileButton.setOnAction(_ -> selectKeyFile());
 
         generateK4iButton = new Button("Generate");
+
+        Tooltip tooltip = new Tooltip("Attempt to generate a key file based on the present installation of Kindle for PC/Mac.");
+        tooltip.setShowDelay(Duration.ZERO);
+        tooltip.setHideDelay(Duration.ZERO);
+
+        generateK4iButton.setTooltip(tooltip);
         generateK4iButton.setOnAction(_ -> generateKeyFile());
 
         keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton, generateK4iButton);
@@ -103,17 +118,46 @@ final class KindleDeDRMController extends VBox {
         serialHbox = new HBox(5.0, serialLabel, serialTextField);
         serialHbox.setAlignment(Pos.CENTER);
 
-        keySerialVbox = new VBox(5.0, keyFileHbox, serialHbox);
+        keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
+        keyOrSerialRequiredLabel.setTextAlignment(TextAlignment.CENTER);
+        keyOrSerialRequiredLabel.visibleProperty().bind(
+                keyFileTextField.textProperty().isEmpty().and(
+                        serialTextField.textProperty().isEmpty()
+                )
+        );
+
+        keySerialVbox = new VBox(5.0, keyFileHbox, serialHbox, keyOrSerialRequiredLabel);
+        keySerialVbox.setAlignment(Pos.CENTER);
         keySerialVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
 
         saveSettingsButton = new Button("Save Settings");
         saveSettingsButton.setOnAction(_ -> saveSettings());
+
+        saveSettingsButton.disableProperty().bind(
+                ebookFileTextField.textProperty().isEmpty().and(
+                        outputDirTextField.textProperty().isEmpty().and(
+                                keyFileTextField.textProperty().isEmpty().and(
+                                        serialTextField.textProperty().isEmpty()
+                                )
+                        )
+                )
+        );
 
         loadSettingsButton = new Button("Load Settings");
         loadSettingsButton.setOnAction(_ -> loadSettings());
 
         resetButton = new Button("Reset");
         resetButton.setOnAction(_ -> resetSettings());
+
+        resetButton.disableProperty().bind(
+                ebookFileTextField.textProperty().isEmpty().and(
+                        outputDirTextField.textProperty().isEmpty().and(
+                                keyFileTextField.textProperty().isEmpty().and(
+                                        serialTextField.textProperty().isEmpty()
+                                )
+                        )
+                )
+        );
 
         settingsHbox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetButton);
         settingsHbox.setAlignment(Pos.CENTER);
@@ -140,6 +184,8 @@ final class KindleDeDRMController extends VBox {
         clearLogsButton = new Button("Clear Logs");
         clearLogsButton.setOnAction(_ -> clearLogs());
 
+        clearLogsButton.disableProperty().bind(textArea.textProperty().isEmpty());
+
         decryptDebugHbox = new HBox(5.0, decryptButton, debugCheckBox);
         decryptDebugHbox.setAlignment(Pos.CENTER);
 
@@ -164,15 +210,21 @@ final class KindleDeDRMController extends VBox {
 
     private void selectEbookFile() {
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("eBook Files", "*.azw", "*.azw3", "*.mobi", "*.kfx", "*.kfx-zip", "*.zip");
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("eBook Files", "*.azw", "*.azw3", "*.mobi", "*.kfx", "*.kfx-zip", "*.zip", "*.rar");
         fileChooser.getExtensionFilters().add(filter);
+
+        if (!ebookFileTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(ebookFileTextField.getText()));
+        else if (!outputDirTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(outputDirTextField.getText()));
+
         fileChooser.setTitle("Open eBook File");
 
         File file = fileChooser.showOpenDialog(ebookFileButton.getScene().getWindow());
 
         if (file != null) {
             ebookFileTextField.setText(file.toString());
-            outputDirTextField.setText(file.getParent());
+            if (outputDirTextField.getText().isEmpty()) outputDirTextField.setText(file.getParent());
         }
     }
 
@@ -180,8 +232,8 @@ final class KindleDeDRMController extends VBox {
     private void selectOutputDir() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
 
-        if (!ebookFileTextField.getText().isEmpty())
-            directoryChooser.setInitialDirectory(new File(ebookFileTextField.getText()).getParentFile());
+        if (outputDirTextField.getText().isEmpty() && !ebookFileTextField.getText().isEmpty())
+            directoryChooser.setInitialDirectory(calculateInitialDirectory(ebookFileTextField.getText()));
 
         directoryChooser.setTitle("Select Output Directory");
 
@@ -190,11 +242,21 @@ final class KindleDeDRMController extends VBox {
         if (outputDir != null) outputDirTextField.setText(outputDir.toString());
     }
 
+    private void deriveOutputDir() {
+        File file = new File(ebookFileTextField.getText());
+
+        if (file.isFile()) outputDirTextField.setText(file.getParent());
+    }
+
 
     private void selectKeyFile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i", "*.json");
         fileChooser.getExtensionFilters().add(filter);
+
+        if (!keyFileTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(keyFileTextField.getText()));
+
         fileChooser.setTitle("Select Key File");
 
         File keyFile = fileChooser.showOpenDialog(keyFileButton.getScene().getWindow());
@@ -294,5 +356,15 @@ final class KindleDeDRMController extends VBox {
 
     private void clearLogs() {
         textArea.clear();
+    }
+
+    private File calculateInitialDirectory(String text) {
+        if (text == null || text.isEmpty()) return null;
+
+        File file = new File(text);
+
+        if (file.isDirectory()) return file;
+        else if (file.isFile()) return file.getParentFile();
+        else return null;
     }
 }
