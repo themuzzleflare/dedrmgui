@@ -6,7 +6,6 @@ package cloud.tavitian.dedrmgui;
 
 import cloud.tavitian.dedrmtools.DeDRM;
 import cloud.tavitian.dedrmtools.Debug;
-import cloud.tavitian.dedrmtools.kindlekeys.KindleKey;
 import com.google.gson.Gson;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -210,7 +209,7 @@ final class KindleDeDRMController extends VBox {
 
     private void selectEbookFile() {
         FileChooser fileChooser = new FileChooser();
-        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("eBook Files", "*.azw", "*.azw3", "*.mobi", "*.kfx", "*.kfx-zip", "*.zip", "*.rar");
+        FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("eBook Files", "*.azw", "*.azw3", "*.mobi", "*.kfx", "*.kfx-zip", "*.zip");
         fileChooser.getExtensionFilters().add(filter);
 
         if (!ebookFileTextField.getText().isEmpty())
@@ -273,9 +272,7 @@ final class KindleDeDRMController extends VBox {
         File keyFile = fileChooser.showSaveDialog(generateK4iButton.getScene().getWindow());
 
         if (keyFile != null) {
-            KindleKey instance = KindleKey.getInstance();
-
-            if (instance.getKey(keyFile.toString())) {
+            if (DeDRM.generateKeyfile(keyFile.toString())) {
                 keyFileTextField.setText(keyFile.toString());
                 System.out.printf("Generated key file: %s%n", keyFile);
             } else System.err.println("Error generating key file");
@@ -325,11 +322,11 @@ final class KindleDeDRMController extends VBox {
                 keyFileTextField.setText(settings.getKeyFile());
                 serialTextField.setText(settings.getSerial());
             } catch (Exception e) {
-                System.err.println("Error loading settings file: " + e.getMessage());
+                System.err.printf("Error loading settings file: %s%n", e.getMessage());
                 return;
             }
 
-            System.out.println("Loaded settings from: " + settingsFile);
+            System.out.printf("Loaded settings from: %s%n", settingsFile);
         }
     }
 
@@ -341,15 +338,15 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void decryptBook() {
-        String serial = serialTextField.getText();
         String infile = ebookFileTextField.getText();
         String outdir = outputDirTextField.getText();
         String keyfile = keyFileTextField.getText();
+        String serial = serialTextField.getText();
 
-        Debug.println("Serial: " + serial);
-        Debug.println("Input File: " + infile);
-        Debug.println("Output Directory: " + outdir);
-        Debug.println("Key File: " + keyfile);
+        Debug.printf("Input File: %s%n", infile);
+        Debug.printf("Output Directory: %s%n", outdir);
+        Debug.printf("Key File: %s%n", keyfile);
+        Debug.printf("Serial: %s%n", serial);
 
         DeDRM.decryptBookWithKDatabaseAndSerial(infile, outdir, keyfile, serial);
     }
