@@ -229,6 +229,8 @@ final class KindleDeDRMController extends VBox {
 
         if (outputDirTextField.getText().isEmpty() && !ebookFileTextField.getText().isEmpty())
             directoryChooser.setInitialDirectory(calculateInitialDirectory(ebookFileTextField.getText()));
+        else if (!outputDirTextField.getText().isEmpty())
+            directoryChooser.setInitialDirectory(calculateInitialDirectory(outputDirTextField.getText()));
 
         directoryChooser.setTitle("Select Output Directory");
 
