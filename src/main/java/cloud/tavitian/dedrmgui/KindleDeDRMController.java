@@ -6,7 +6,6 @@ package cloud.tavitian.dedrmgui;
 
 import cloud.tavitian.dedrmtools.DeDRM;
 import cloud.tavitian.dedrmtools.Debug;
-import com.google.gson.Gson;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -18,12 +17,8 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 
 final class KindleDeDRMController extends VBox {
-    private static final Gson gson = new Gson();
-
     private final TextAreaPrintStream printStream;
 
     private final HBox decryptDebugHbox;
@@ -176,6 +171,7 @@ final class KindleDeDRMController extends VBox {
 
         textArea = new TextArea();
         textArea.setEditable(false);
+        textArea.setWrapText(true);
 
         debugCheckBox = new CheckBox("Verbose");
         debugCheckBox.setOnAction(_ -> Debug.setEnabled(debugCheckBox.isSelected()));
@@ -280,11 +276,7 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void saveSettings() {
-        SettingsDict settings = new SettingsDict();
-        settings.setInputFile(ebookFileTextField.getText());
-        settings.setOutputFile(outputDirTextField.getText());
-        settings.setKeyFile(keyFileTextField.getText());
-        settings.setSerial(serialTextField.getText());
+        SettingsDict settings = new SettingsDict(ebookFileTextField.getText(), outputDirTextField.getText(), keyFileTextField.getText(), serialTextField.getText());
 
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".json Files", "*.json");
@@ -295,8 +287,8 @@ final class KindleDeDRMController extends VBox {
         File settingsFile = fileChooser.showSaveDialog(saveSettingsButton.getScene().getWindow());
 
         if (settingsFile != null) {
-            try (FileWriter writer = new FileWriter(settingsFile)) {
-                gson.toJson(settings, writer);
+            try {
+                settings.writeToFile(settingsFile);
             } catch (Exception e) {
                 System.err.printf("Error saving settings file: %s%n", e.getMessage());
                 return;
@@ -315,8 +307,9 @@ final class KindleDeDRMController extends VBox {
         File settingsFile = fileChooser.showOpenDialog(loadSettingsButton.getScene().getWindow());
 
         if (settingsFile != null) {
-            try (FileReader reader = new FileReader(settingsFile)) {
-                SettingsDict settings = gson.fromJson(reader, SettingsDict.class);
+            try {
+                SettingsDict settings = new SettingsDict(settingsFile);
+
                 ebookFileTextField.setText(settings.getInputFile());
                 outputDirTextField.setText(settings.getOutputFile());
                 keyFileTextField.setText(settings.getKeyFile());

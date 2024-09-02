@@ -4,13 +4,62 @@
 
 package cloud.tavitian.dedrmgui;
 
+import com.google.gson.Gson;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.LinkedHashMap;
 
 final class SettingsDict extends LinkedHashMap<String, String> {
+    private static final Gson gson = new Gson();
+
     private static final String inputFileKey = "inputFile";
     private static final String outputFileKey = "outputFile";
     private static final String keyFileKey = "keyFile";
     private static final String serialKey = "serial";
+
+    public SettingsDict() {
+        super();
+    }
+
+    public SettingsDict(File file) throws IOException {
+        this(file.getAbsolutePath());
+    }
+
+    public SettingsDict(String filename) throws IOException {
+        super();
+        SettingsDict settings = loadFromFile(filename);
+        putAll(settings);
+    }
+
+    public SettingsDict(String inputFile, String outputFile, String keyFile, String serial) {
+        super();
+        put(inputFileKey, inputFile);
+        put(outputFileKey, outputFile);
+        put(keyFileKey, keyFile);
+        put(serialKey, serial);
+    }
+
+    public static SettingsDict loadFromFile(File file) throws IOException {
+        return loadFromFile(file.getAbsolutePath());
+    }
+
+    public static SettingsDict loadFromFile(String filename) throws IOException {
+        FileReader fileReader = new FileReader(filename);
+        return gson.fromJson(fileReader, SettingsDict.class);
+    }
+
+    public void writeToFile(File file) throws IOException {
+        writeToFile(file.getAbsolutePath());
+    }
+
+    public void writeToFile(String filename) throws IOException {
+        FileWriter fileWriter = new FileWriter(filename);
+        gson.toJson(this, fileWriter);
+        fileWriter.close();
+    }
 
     public String getInputFile() {
         return get(inputFileKey);
