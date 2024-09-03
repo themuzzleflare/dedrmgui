@@ -60,7 +60,7 @@ final class KindleDeDRMController extends VBox {
         ebookFileTextField.setPromptText("eBook File");
 
         ebookFileButton = new Button("Select");
-        ebookFileButton.setOnAction(_ -> selectEbookFile());
+        ebookFileButton.setOnAction(event -> selectEbookFile());
 
         ebookFileHbox = new HBox(5.0, ebookFileLabel, ebookFileTextField, ebookFileButton);
         ebookFileHbox.setAlignment(Pos.CENTER);
@@ -71,10 +71,10 @@ final class KindleDeDRMController extends VBox {
         outputDirTextField.setPromptText("Output Directory");
 
         outputDirButton = new Button("Select");
-        outputDirButton.setOnAction(_ -> selectOutputDir());
+        outputDirButton.setOnAction(event -> selectOutputDir());
 
         deriveOutputDirButton = new Button("Derive");
-        deriveOutputDirButton.setOnAction(_ -> deriveOutputDir());
+        deriveOutputDirButton.setOnAction(event -> deriveOutputDir());
 
         deriveOutputDirButton.disableProperty().bind(ebookFileTextField.textProperty().isEmpty());
 
@@ -90,7 +90,7 @@ final class KindleDeDRMController extends VBox {
         keyFileTextField.setPromptText(".k4i File");
 
         keyFileButton = new Button("Select");
-        keyFileButton.setOnAction(_ -> selectKeyFile());
+        keyFileButton.setOnAction(event -> selectKeyFile());
 
         generateK4iButton = new Button("Generate");
 
@@ -99,7 +99,7 @@ final class KindleDeDRMController extends VBox {
         tooltip.setHideDelay(Duration.ZERO);
 
         generateK4iButton.setTooltip(tooltip);
-        generateK4iButton.setOnAction(_ -> generateKeyFile());
+        generateK4iButton.setOnAction(event -> generateKeyFile());
 
         keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton, generateK4iButton);
         keyFileHbox.setAlignment(Pos.CENTER);
@@ -125,7 +125,7 @@ final class KindleDeDRMController extends VBox {
         keySerialVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
 
         saveSettingsButton = new Button("Save Settings");
-        saveSettingsButton.setOnAction(_ -> saveSettings());
+        saveSettingsButton.setOnAction(event -> saveSettings());
 
         saveSettingsButton.disableProperty().bind(
                 ebookFileTextField.textProperty().isEmpty().and(
@@ -138,10 +138,10 @@ final class KindleDeDRMController extends VBox {
         );
 
         loadSettingsButton = new Button("Load Settings");
-        loadSettingsButton.setOnAction(_ -> loadSettings());
+        loadSettingsButton.setOnAction(event -> loadSettings());
 
         resetButton = new Button("Reset");
-        resetButton.setOnAction(_ -> resetSettings());
+        resetButton.setOnAction(event -> resetSettings());
 
         resetButton.disableProperty().bind(
                 ebookFileTextField.textProperty().isEmpty().and(
@@ -157,7 +157,7 @@ final class KindleDeDRMController extends VBox {
         settingsHbox.setAlignment(Pos.CENTER);
 
         decryptButton = new Button("Decrypt");
-        decryptButton.setOnAction(_ -> decryptBook());
+        decryptButton.setOnAction(event -> decryptBook());
 
         decryptButton.disableProperty().bind(
                 ebookFileTextField.textProperty().isEmpty().or(
@@ -174,10 +174,10 @@ final class KindleDeDRMController extends VBox {
         textArea.setWrapText(true);
 
         debugCheckBox = new CheckBox("Verbose");
-        debugCheckBox.setOnAction(_ -> Debug.setEnabled(debugCheckBox.isSelected()));
+        debugCheckBox.setOnAction(event -> Debug.setEnabled(debugCheckBox.isSelected()));
 
         clearLogsButton = new Button("Clear Logs");
-        clearLogsButton.setOnAction(_ -> clearLogs());
+        clearLogsButton.setOnAction(event -> clearLogs());
 
         clearLogsButton.disableProperty().bind(textArea.textProperty().isEmpty());
 

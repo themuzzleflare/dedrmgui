@@ -30,16 +30,15 @@ final class SettingsDict extends LinkedHashMap<String, String> {
 
     public SettingsDict(String filename) throws IOException {
         super();
-        SettingsDict settings = loadFromFile(filename);
-        putAll(settings);
+        putAll(loadFromFile(filename));
     }
 
     public SettingsDict(String inputFile, String outputFile, String keyFile, String serial) {
         super();
-        put(inputFileKey, inputFile);
-        put(outputFileKey, outputFile);
-        put(keyFileKey, keyFile);
-        put(serialKey, serial);
+        setInputFile(inputFile);
+        setOutputFile(outputFile);
+        setKeyFile(keyFile);
+        setSerial(serial);
     }
 
     public static SettingsDict loadFromFile(File file) throws IOException {
@@ -47,8 +46,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     }
 
     public static SettingsDict loadFromFile(String filename) throws IOException {
-        FileReader fileReader = new FileReader(filename);
-        return gson.fromJson(fileReader, SettingsDict.class);
+        return gson.fromJson(new FileReader(filename), SettingsDict.class);
     }
 
     public void writeToFile(File file) throws IOException {
