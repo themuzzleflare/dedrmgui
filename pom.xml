@@ -41,45 +41,6 @@
 
     <build>
         <plugins>
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
-            <!--            <plugin>-->
-            <!--                <groupId>org.apache.maven.plugins</groupId>-->
-            <!--                <artifactId>maven-dependency-plugin</artifactId>-->
-            <!--                <version>3.8.0</version>-->
-            <!--                <executions>-->
-            <!--                    <execution>-->
-            <!--                        <id>copy-dependencies</id>-->
-            <!--                        <phase>package</phase>-->
-            <!--                        <goals>-->
-            <!--                            <goal>copy-dependencies</goal>-->
-            <!--                        </goals>-->
-            <!--                        <configuration>-->
-            <!--                            <outputDirectory>${project.build.directory}/libs</outputDirectory>-->
-            <!--                            <overWriteReleases>false</overWriteReleases>-->
-            <!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
-            <!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
-            <!--                            <includeScope>compile</includeScope>-->
-            <!--                            <includeScope>runtime</includeScope>-->
-            <!--                        </configuration>-->
-            <!--                    </execution>-->
-            <!--                </executions>-->
-            <!--            </plugin>-->
-
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
-                <configuration>
-                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
-                    <archive>
-                        <manifest>
-                            <mainClass>cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-
             <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-maven-plugin -->
             <plugin>
                 <groupId>org.openjfx</groupId>
@@ -87,7 +48,6 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>dedrmgui/cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
-                    <launcher>dedrmgui</launcher>
                     <jlinkZipName>app</jlinkZipName>
                     <jlinkImageName>app</jlinkImageName>
                     <jlinkVerbose>true</jlinkVerbose>
