@@ -18,6 +18,20 @@
     <artifactId>dedrmgui</artifactId>
 
     <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-controls -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>cloud.tavitian</groupId>
             <artifactId>dedrmtools</artifactId>
@@ -27,54 +41,29 @@
 
     <build>
         <plugins>
-            <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-maven-plugin -->
-            <plugin>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.8</version>
-                <executions>
-                    <execution>
-                        <!-- Default configuration for running with: mvn clean javafx:run -->
-                        <id>default-cli</id>
-                        <configuration>
-                            <mainClass>dedrmgui/cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
-                            <launcher>app</launcher>
-                            <jlinkZipName>app</jlinkZipName>
-                            <jlinkImageName>app</jlinkImageName>
-                            <jlinkVerbose>true</jlinkVerbose>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <noHeaderFiles>true</noHeaderFiles>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-assembly-plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.7.1</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>cloud.tavitian.dedrmgui.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-dependency-plugin -->
+            <!--            <plugin>-->
+            <!--                <groupId>org.apache.maven.plugins</groupId>-->
+            <!--                <artifactId>maven-dependency-plugin</artifactId>-->
+            <!--                <version>3.8.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>copy-dependencies</id>-->
+            <!--                        <phase>package</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>copy-dependencies</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <outputDirectory>${project.build.directory}/libs</outputDirectory>-->
+            <!--                            <overWriteReleases>false</overWriteReleases>-->
+            <!--                            <overWriteSnapshots>false</overWriteSnapshots>-->
+            <!--                            <overWriteIfNewer>true</overWriteIfNewer>-->
+            <!--                            <includeScope>compile</includeScope>-->
+            <!--                            <includeScope>runtime</includeScope>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
 
             <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
             <plugin>
@@ -82,11 +71,30 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
                 <configuration>
+                    <outputDirectory>${project.build.directory}/libs</outputDirectory>
                     <archive>
                         <manifest>
-                            <mainClass>cloud.tavitian.dedrmgui.Main</mainClass>
+                            <mainClass>cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
                         </manifest>
                     </archive>
+                </configuration>
+            </plugin>
+
+            <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-maven-plugin -->
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>dedrmgui/cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
+                    <launcher>dedrmgui</launcher>
+                    <jlinkZipName>app</jlinkZipName>
+                    <jlinkImageName>app</jlinkImageName>
+                    <jlinkVerbose>true</jlinkVerbose>
+                    <noManPages>true</noManPages>
+                    <stripDebug>true</stripDebug>
+                    <stripJavaDebugAttributes>true</stripJavaDebugAttributes>
+                    <noHeaderFiles>true</noHeaderFiles>
                 </configuration>
             </plugin>
         </plugins>
@@ -101,47 +109,25 @@
                     <arch>aarch64</arch>
                 </os>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-controls</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac-aarch64</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-fxml</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac-aarch64</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac-aarch64</classifier>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jlink-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>jlink</id>
+                                <id>jlink-mac-aarch64</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jlink</goal>
                                 </goals>
+                                <configuration>
+                                    <jlinkImageName>app-mac-aarch64</jlinkImageName>
+                                    <jlinkZipName>app-mac-aarch64</jlinkZipName>
+                                    <jmodsPath>../jmods/${maven.compiler.target}/mac-aarch64</jmodsPath>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <noHeaderFiles>true</noHeaderFiles>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                            <verbose>true</verbose>
-                            <detail>true</detail>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -154,45 +140,25 @@
                     <arch>x86_64</arch>
                 </os>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-controls</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-fxml</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>mac</classifier>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jlink-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>jlink</id>
+                                <id>jlink-mac</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jlink</goal>
                                 </goals>
+                                <configuration>
+                                    <jlinkImageName>app-mac</jlinkImageName>
+                                    <jlinkZipName>app-mac</jlinkZipName>
+                                    <jmodsPath>../jmods/${maven.compiler.target}/mac</jmodsPath>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <noHeaderFiles>true</noHeaderFiles>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                        </configuration>
                     </plugin>
                 </plugins>
             </build>
@@ -204,45 +170,87 @@
                     <family>windows</family>
                 </os>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-controls</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>win</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-fxml</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>win</classifier>
-                </dependency>
-                <dependency>
-                    <groupId>org.openjfx</groupId>
-                    <artifactId>javafx-graphics</artifactId>
-                    <version>${javafx.version}</version>
-                    <classifier>win</classifier>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jlink-plugin</artifactId>
-                        <version>3.2.0</version>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>jlink</id>
+                                <id>jlink-win</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jlink</goal>
                                 </goals>
+                                <configuration>
+                                    <jlinkImageName>app-win</jlinkImageName>
+                                    <jlinkZipName>app-win</jlinkZipName>
+                                    <jmodsPath>../jmods/${maven.compiler.target}/win</jmodsPath>
+                                </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <noHeaderFiles>true</noHeaderFiles>
-                            <noManPages>true</noManPages>
-                            <stripDebug>true</stripDebug>
-                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>linux-aarch64</id>
+            <activation>
+                <os>
+                    <name>Linux</name>
+                    <arch>aarch64</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jlink-linux-aarch64</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jlink</goal>
+                                </goals>
+                                <configuration>
+                                    <jlinkImageName>app-linux-aarch64</jlinkImageName>
+                                    <jlinkZipName>app-linux-aarch64</jlinkZipName>
+                                    <jmodsPath>../jmods/${maven.compiler.target}/linux-aarch64</jmodsPath>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>linux</id>
+            <activation>
+                <os>
+                    <name>Linux</name>
+                    <arch>x86_64</arch>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.openjfx</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jlink-linux</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jlink</goal>
+                                </goals>
+                                <configuration>
+                                    <jlinkImageName>app-linux</jlinkImageName>
+                                    <jlinkZipName>app-linux</jlinkZipName>
+                                    <jmodsPath>../jmods/${maven.compiler.target}/linux</jmodsPath>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>
