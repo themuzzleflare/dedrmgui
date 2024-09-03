@@ -5,5 +5,6 @@ module dedrmgui {
     requires com.google.gson;
 
     opens cloud.tavitian.dedrmgui to javafx.fxml, com.google.gson;
+    
     exports cloud.tavitian.dedrmgui;
 }
