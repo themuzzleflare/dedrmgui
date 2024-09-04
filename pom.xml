@@ -55,6 +55,7 @@
                     <stripDebug>true</stripDebug>
                     <stripJavaDebugAttributes>true</stripJavaDebugAttributes>
                     <noHeaderFiles>true</noHeaderFiles>
+                    <compress>2</compress>
                 </configuration>
             </plugin>
         </plugins>
