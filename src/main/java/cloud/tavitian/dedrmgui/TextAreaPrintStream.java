@@ -6,6 +6,7 @@ package cloud.tavitian.dedrmgui;
 
 import javafx.application.Platform;
 import javafx.scene.control.TextArea;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintStream;
 import java.util.Locale;
@@ -44,7 +45,7 @@ final class TextAreaPrintStream extends PrintStream {
     }
 
     @Override
-    public void print(char[] s) {
+    public void print(char @NotNull [] s) {
         Platform.runLater(() -> textArea.appendText(new String(s)));
     }
 
@@ -99,7 +100,7 @@ final class TextAreaPrintStream extends PrintStream {
     }
 
     @Override
-    public void println(char[] x) {
+    public void println(char @NotNull [] x) {
         Platform.runLater(() -> textArea.appendText(new String(x) + "\n"));
     }
 
@@ -114,13 +115,13 @@ final class TextAreaPrintStream extends PrintStream {
     }
 
     @Override
-    public PrintStream printf(String format, Object... args) {
+    public PrintStream printf(@NotNull String format, Object... args) {
         Platform.runLater(() -> textArea.appendText(String.format(format, args)));
         return null;
     }
 
     @Override
-    public PrintStream printf(Locale l, String format, Object... args) {
+    public PrintStream printf(Locale l, @NotNull String format, Object... args) {
         Platform.runLater(() -> textArea.appendText(String.format(l, format, args)));
         return null;
     }
