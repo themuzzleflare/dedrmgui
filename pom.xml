@@ -11,7 +11,7 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>4.0.0</version>
+        <version>5.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -39,7 +39,7 @@
         <dependency>
             <groupId>cloud.tavitian</groupId>
             <artifactId>dedrmtools</artifactId>
-            <version>4.0.0</version>
+            <version>5.0.0</version>
         </dependency>
     </dependencies>
 
