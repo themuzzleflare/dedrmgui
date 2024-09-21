@@ -7,6 +7,7 @@ package cloud.tavitian.dedrmgui;
 import cloud.tavitian.dedrmtools.DeDRM;
 import cloud.tavitian.dedrmtools.Debug;
 import javafx.application.Platform;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
@@ -23,285 +24,339 @@ import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-final class KindleDeDRMController extends VBox {
-    private final TextAreaPrintStream printStream;
-
-    private final HBox decryptDebugHbox;
-    private final CheckBox debugCheckBox;
-    private final HBox ebookFileHbox;
-    private final Label ebookFileLabel;
-    private final TextField ebookFileTextField;
-    private final Button ebookFileButton;
-    private final HBox outputDirHbox;
-    private final Label outputDirLabel;
-    private final TextField outputDirTextField;
-    private final Button outputDirButton;
-    private final HBox keyFileHbox;
-    private final Label keyFileLabel;
-    private final TextField keyFileTextField;
-    private final Button keyFileButton;
-    private final HBox serialHbox;
-    private final Label serialLabel;
-    private final TextField serialTextField;
-    private final Button decryptButton;
-    private final TextArea textArea;
-    private final HBox settingsHbox;
-    private final Button saveSettingsButton;
-    private final Button loadSettingsButton;
-    private final VBox inputOutputVbox;
-    private final VBox keySerialVbox;
-    private final Button clearLogsButton;
-    private final VBox logDecryptVbox;
-    private final HBox decryptHbox;
-    private final Button resetButton;
-    private final Button generateK4iButton;
-    private final Label keyOrSerialRequiredLabel;
-    private final Button deriveOutputDirButton;
+final class KindleDeDRMController {
+    private final Label ebookfileLabel = new Label("eBook File");
+    private final TextField ebookfileTextField = new TextField();
+    private final Button selectEbookfileButton = new Button("Select");
+    private final HBox ebookfileHBox = new HBox(5.0, ebookfileLabel, ebookfileTextField, selectEbookfileButton);
+    private final Label outputdirLabel = new Label("Output Directory");
+    private final TextField outputdirTextField = new TextField();
+    private final Button selectOutputdirButton = new Button("Select");
+    private final Button deriveOutputdirButton = new Button("Derive");
+    private final HBox outputdirHBox = new HBox(5.0, outputdirLabel, outputdirTextField, selectOutputdirButton, deriveOutputdirButton);
+    private final VBox inputOutputVBox = new VBox(5.0, ebookfileHBox, outputdirHBox);
+    private final Label keyfileLabel = new Label("Key File");
+    private final TextField keyfileTextField = new TextField();
+    private final Button selectKeyfileButton = new Button("Select");
+    private final Button generateKeyfileButton = new Button("Generate");
+    private final HBox keyfileHBox = new HBox(5.0, keyfileLabel, keyfileTextField, selectKeyfileButton, generateKeyfileButton);
+    private final Label serialLabel = new Label("Serial");
+    private final TextField serialTextField = new TextField();
+    private final HBox serialHBox = new HBox(5.0, serialLabel, serialTextField);
+    private final Label keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
+    private final VBox keySerialVBox = new VBox(5.0, keyfileHBox, serialHBox);
+    private final Button decryptButton = new Button("Decrypt");
+    private final CheckBox verboseCheckbox = new CheckBox("Verbose");
+    private final HBox decryptVerboseHBox = new HBox(5.0, decryptButton, verboseCheckbox);
+    private final Button clearLogsButton = new Button("Clear Logs");
+    private final HBox decryptVerboseClearLogsHBox = new HBox(5.0, decryptVerboseHBox, new Spacer(), clearLogsButton);
+    private final TextArea consoleOutputTextArea = new TextArea();
+    private final VBox consoleDecryptVBox = new VBox(5.0, consoleOutputTextArea, decryptVerboseClearLogsHBox);
+    private final TextAreaPrintStream printStream = new TextAreaPrintStream(consoleOutputTextArea);
+    private final Button saveSettingsButton = new Button("Save Settings");
+    private final Button loadSettingsButton = new Button("Load Settings");
+    private final Button resetSettingsButton = new Button("Reset");
+    private final HBox settingsHBox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetSettingsButton);
+    final VBox rootVBox = new VBox(20.0, inputOutputVBox, keySerialVBox, settingsHBox, consoleDecryptVBox);
 
     private final BooleanProperty isDecrypting = new SimpleBooleanProperty(false);
     private final BooleanProperty isGeneratingKeyfile = new SimpleBooleanProperty(false);
 
-    public KindleDeDRMController() {
-        ebookFileLabel = new Label("eBook File:");
+    private final BooleanBinding isDecryptingOrGeneratingKeyfile = isDecrypting.or(isGeneratingKeyfile);
+    private final BooleanBinding ebookfileTextFieldEmpty = ebookfileTextField.textProperty().isEmpty();
+    private final BooleanBinding outputdirTextFieldEmpty = outputdirTextField.textProperty().isEmpty();
+    private final BooleanBinding keyfileTextFieldEmpty = keyfileTextField.textProperty().isEmpty();
+    private final BooleanBinding serialTextFieldEmpty = serialTextField.textProperty().isEmpty();
+    private final BooleanBinding consoleOutputTextAreaEmpty = consoleOutputTextArea.textProperty().isEmpty();
 
-        ebookFileTextField = new TextField();
-        ebookFileTextField.setPromptText("eBook File");
+    private final BooleanBinding ebookfileAndOutputdirEmpty = ebookfileTextFieldEmpty.and(outputdirTextFieldEmpty);
+    private final BooleanBinding ebookfileOrOutputdirEmpty = ebookfileTextFieldEmpty.or(outputdirTextFieldEmpty);
+    private final BooleanBinding keyAndSerialEmpty = keyfileTextFieldEmpty.and(serialTextFieldEmpty);
+    private final BooleanBinding keyOrSerialEmpty = keyfileTextFieldEmpty.or(serialTextFieldEmpty);
+    private final BooleanBinding allFieldsEmpty = ebookfileAndOutputdirEmpty.and(keyAndSerialEmpty);
 
-        ebookFileButton = new Button("Select");
-        ebookFileButton.setOnAction(event -> selectEbookFile());
+    private final BooleanBinding deriveOutputdirDisabled = ebookfileTextFieldEmpty;
+    private final BooleanBinding clearLogsDisabled = consoleOutputTextAreaEmpty;
+    private final BooleanBinding decryptDisabled = ebookfileOrOutputdirEmpty.or(keyAndSerialEmpty);
+    private final BooleanBinding saveResetDisabled = allFieldsEmpty;
+    private final BooleanBinding keyOrSerialRequiredVisible = keyAndSerialEmpty;
+    private final BooleanBinding rootVBoxDisabled = isDecryptingOrGeneratingKeyfile;
 
-        ebookFileHbox = new HBox(5.0, ebookFileLabel, ebookFileTextField, ebookFileButton);
-        ebookFileHbox.setAlignment(Pos.CENTER);
+    KindleDeDRMController() {
+        configureNodes();
+        configurePrintStream();
+    }
 
-        outputDirLabel = new Label("Output Directory:");
+    private void configureNodes() {
+        configureEbookfileTextField();
+        configureSelectEbookfileButton();
+        configureEbookfileHBox();
+        configureOutputdirTextField();
+        configureSelectOutputdirButton();
+        configureDeriveOutputdirButton();
+        configureOutputdirHBox();
+        configureInputOutputVBox();
+        configureKeyfileTextField();
+        configureSelectKeyfileButton();
+        configureGenerateKeyfileButton();
+        configureKeyfileHBox();
+        configureSerialTextField();
+        configureSerialHBox();
+        configureKeyOrSerialRequiredLabel();
+        configureKeySerialVBox();
+        configureSaveSettingsButton();
+        configureLoadSettingsButton();
+        configureResetSettingsButton();
+        configureSettingsHBox();
+        configureDecryptButton();
+        configureConsoleOutputTextArea();
+        configureVerboseCheckbox();
+        configureClearLogsButton();
+        configureDecryptVerboseHBox();
+        configureDecryptVerboseClearLogsHBox();
+        configureConsoleDecryptVBox();
+        configureRootVBox();
+    }
 
-        outputDirTextField = new TextField();
-        outputDirTextField.setPromptText("Output Directory");
+    private void configureRootVBox() {
+        rootVBox.setPadding(new Insets(10.0));
+        rootVBox.disableProperty().bind(rootVBoxDisabled);
+    }
 
-        outputDirButton = new Button("Select");
-        outputDirButton.setOnAction(event -> selectOutputDir());
+    private void configurePrintStream() {
+        System.setOut(printStream);
+        System.setErr(printStream);
+    }
 
-        deriveOutputDirButton = new Button("Derive");
-        deriveOutputDirButton.setOnAction(event -> deriveOutputDir());
+    private void configureConsoleDecryptVBox() {
+        VBox.setVgrow(consoleDecryptVBox, Priority.ALWAYS);
+    }
 
-        deriveOutputDirButton.disableProperty().bind(ebookFileTextField.textProperty().isEmpty());
+    private void configureDecryptVerboseClearLogsHBox() {
+        decryptVerboseClearLogsHBox.setAlignment(Pos.CENTER);
+    }
 
-        outputDirHbox = new HBox(5.0, outputDirLabel, outputDirTextField, outputDirButton, deriveOutputDirButton);
-        outputDirHbox.setAlignment(Pos.CENTER);
+    private void configureDecryptVerboseHBox() {
+        decryptVerboseHBox.setAlignment(Pos.CENTER);
+    }
 
-        inputOutputVbox = new VBox(5.0, ebookFileHbox, outputDirHbox);
-        inputOutputVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
+    private void configureClearLogsButton() {
+        clearLogsButton.setOnAction(event -> clearLogs());
+        clearLogsButton.disableProperty().bind(clearLogsDisabled);
+    }
 
-        keyFileLabel = new Label("Key File:");
+    private void configureVerboseCheckbox() {
+        verboseCheckbox.setOnAction(event -> Debug.setEnabled(verboseCheckbox.isSelected()));
+    }
 
-        keyFileTextField = new TextField();
-        keyFileTextField.setPromptText(".k4i File");
+    private void configureConsoleOutputTextArea() {
+        consoleOutputTextArea.setEditable(false);
+        consoleOutputTextArea.setWrapText(true);
+        consoleOutputTextArea.setPromptText("Console Output");
 
-        keyFileButton = new Button("Select");
-        keyFileButton.setOnAction(event -> selectKeyFile());
+        VBox.setVgrow(consoleOutputTextArea, Priority.ALWAYS);
+    }
 
-        generateK4iButton = new Button("Generate");
+    private void configureDecryptButton() {
+        decryptButton.setOnAction(event -> decryptBookThrowing());
+        decryptButton.disableProperty().bind(decryptDisabled);
+    }
 
+    private void configureSettingsHBox() {
+        settingsHBox.setAlignment(Pos.CENTER);
+    }
+
+    private void configureResetSettingsButton() {
+        resetSettingsButton.setOnAction(event -> resetSettings());
+        resetSettingsButton.disableProperty().bind(saveResetDisabled);
+    }
+
+    private void configureLoadSettingsButton() {
+        loadSettingsButton.setOnAction(event -> loadSettings());
+    }
+
+    private void configureSaveSettingsButton() {
+        saveSettingsButton.setOnAction(event -> saveSettings());
+        saveSettingsButton.disableProperty().bind(saveResetDisabled);
+    }
+
+    private void configureKeySerialVBox() {
+        keySerialVBox.setAlignment(Pos.CENTER);
+        keySerialVBox.setPadding(new Insets(5.0));
+        keySerialVBox.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(1.0))));
+    }
+
+    private void configureKeyOrSerialRequiredLabel() {
+        keyOrSerialRequiredLabel.setTextAlignment(TextAlignment.CENTER);
+        keyOrSerialRequiredLabel.visibleProperty().bind(keyOrSerialRequiredVisible);
+    }
+
+    private void configureSerialHBox() {
+        serialHBox.setAlignment(Pos.CENTER);
+    }
+
+    private void configureSerialTextField() {
+        serialTextField.setPromptText("Kindle Serial Number");
+
+        HBox.setHgrow(serialTextField, Priority.ALWAYS);
+    }
+
+    private void configureKeyfileHBox() {
+        keyfileHBox.setAlignment(Pos.CENTER);
+    }
+
+    private void configureGenerateKeyfileButton() {
         Tooltip tooltip = new Tooltip("Attempt to generate a key file based on the present installation of Kindle for PC/Mac.");
         tooltip.setShowDelay(Duration.ZERO);
         tooltip.setHideDelay(Duration.ZERO);
 
-        generateK4iButton.setTooltip(tooltip);
-        generateK4iButton.setOnAction(event -> generateKeyFileThrowing());
-
-        keyFileHbox = new HBox(5.0, keyFileLabel, keyFileTextField, keyFileButton, generateK4iButton);
-        keyFileHbox.setAlignment(Pos.CENTER);
-
-        serialLabel = new Label("Serial:");
-
-        serialTextField = new TextField();
-        serialTextField.setPromptText("Kindle Serial Number");
-
-        serialHbox = new HBox(5.0, serialLabel, serialTextField);
-        serialHbox.setAlignment(Pos.CENTER);
-
-        keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
-        keyOrSerialRequiredLabel.setTextAlignment(TextAlignment.CENTER);
-        keyOrSerialRequiredLabel.visibleProperty().bind(
-                keyFileTextField.textProperty().isEmpty().and(
-                        serialTextField.textProperty().isEmpty()
-                )
-        );
-
-        keySerialVbox = new VBox(5.0, keyFileHbox, serialHbox, keyOrSerialRequiredLabel);
-        keySerialVbox.setAlignment(Pos.CENTER);
-        keySerialVbox.setBackground(new Background(new BackgroundFill(Color.LIGHTGRAY, new CornerRadii(5.0), new Insets(-5.0))));
-
-        saveSettingsButton = new Button("Save Settings");
-        saveSettingsButton.setOnAction(event -> saveSettings());
-
-        saveSettingsButton.disableProperty().bind(
-                ebookFileTextField.textProperty().isEmpty().and(
-                        outputDirTextField.textProperty().isEmpty().and(
-                                keyFileTextField.textProperty().isEmpty().and(
-                                        serialTextField.textProperty().isEmpty()
-                                )
-                        )
-                )
-        );
-
-        loadSettingsButton = new Button("Load Settings");
-        loadSettingsButton.setOnAction(event -> loadSettings());
-
-        resetButton = new Button("Reset");
-        resetButton.setOnAction(event -> resetSettings());
-
-        resetButton.disableProperty().bind(
-                ebookFileTextField.textProperty().isEmpty().and(
-                        outputDirTextField.textProperty().isEmpty().and(
-                                keyFileTextField.textProperty().isEmpty().and(
-                                        serialTextField.textProperty().isEmpty()
-                                )
-                        )
-                )
-        );
-
-        settingsHbox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetButton);
-        settingsHbox.setAlignment(Pos.CENTER);
-
-        decryptButton = new Button("Decrypt");
-        decryptButton.setOnAction(event -> decryptBookThrowing());
-
-        decryptButton.disableProperty().bind(
-                ebookFileTextField.textProperty().isEmpty().or(
-                        outputDirTextField.textProperty().isEmpty().or(
-                                keyFileTextField.textProperty().isEmpty().and(
-                                        serialTextField.textProperty().isEmpty()
-                                )
-                        )
-                )
-        );
-
-        textArea = new TextArea();
-        textArea.setEditable(false);
-        textArea.setWrapText(true);
-
-        debugCheckBox = new CheckBox("Verbose");
-        debugCheckBox.setOnAction(event -> Debug.setEnabled(debugCheckBox.isSelected()));
-
-        clearLogsButton = new Button("Clear Logs");
-        clearLogsButton.setOnAction(event -> clearLogs());
-
-        clearLogsButton.disableProperty().bind(textArea.textProperty().isEmpty());
-
-        decryptDebugHbox = new HBox(5.0, decryptButton, debugCheckBox);
-        decryptDebugHbox.setAlignment(Pos.CENTER);
-
-        HBox.setHgrow(decryptDebugHbox, Priority.ALWAYS);
-
-        decryptHbox = new HBox(5.0, decryptDebugHbox, clearLogsButton);
-        decryptHbox.setAlignment(Pos.CENTER);
-
-        logDecryptVbox = new VBox(5.0, textArea, decryptHbox);
-
-        setSpacing(20.0);
-        setPadding(new Insets(10.0));
-
-        getChildren().addAll(inputOutputVbox, keySerialVbox, settingsHbox, logDecryptVbox);
-
-        printStream = new TextAreaPrintStream(textArea);
-
-        System.setOut(printStream);
-        System.setErr(printStream);
-
-        disableProperty().bind(isDecrypting.or(isGeneratingKeyfile));
+        generateKeyfileButton.setTooltip(tooltip);
+        generateKeyfileButton.setOnAction(event -> generateKeyfileThrowing());
     }
 
+    private void configureSelectKeyfileButton() {
+        selectKeyfileButton.setOnAction(event -> selectKeyfile());
+    }
 
-    private void selectEbookFile() {
+    private void configureKeyfileTextField() {
+        keyfileTextField.setPromptText(".k4i File");
+
+        HBox.setHgrow(keyfileTextField, Priority.ALWAYS);
+    }
+
+    private void configureInputOutputVBox() {
+        inputOutputVBox.setAlignment(Pos.CENTER);
+        inputOutputVBox.setPadding(new Insets(5.0));
+        inputOutputVBox.setBorder(new Border(new BorderStroke(Color.DARKGRAY, BorderStrokeStyle.SOLID, new CornerRadii(5.0), new BorderWidths(1.0))));
+    }
+
+    private void configureOutputdirHBox() {
+        outputdirHBox.setAlignment(Pos.CENTER);
+    }
+
+    private void configureDeriveOutputdirButton() {
+        deriveOutputdirButton.setOnAction(event -> deriveOutputdir());
+        deriveOutputdirButton.disableProperty().bind(deriveOutputdirDisabled);
+    }
+
+    private void configureSelectOutputdirButton() {
+        selectOutputdirButton.setOnAction(event -> selectOutputdir());
+    }
+
+    private void configureOutputdirTextField() {
+        outputdirTextField.setPromptText("Output Directory");
+
+        HBox.setHgrow(outputdirTextField, Priority.ALWAYS);
+    }
+
+    private void configureEbookfileHBox() {
+        ebookfileHBox.setAlignment(Pos.CENTER);
+    }
+
+    private void configureSelectEbookfileButton() {
+        selectEbookfileButton.setOnAction(event -> selectEbookfile());
+    }
+
+    private void configureEbookfileTextField() {
+        ebookfileTextField.setPromptText("eBook File");
+
+        HBox.setHgrow(ebookfileTextField, Priority.ALWAYS);
+    }
+
+    VBox getRootVBox() {
+        return rootVBox;
+    }
+
+    private void selectEbookfile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter("eBook Files", "*.azw", "*.azw3", "*.azw4", "*.mobi", "*.kfx", "*.kfx-zip", "*.zip");
         fileChooser.getExtensionFilters().add(filter);
 
-        if (!ebookFileTextField.getText().isEmpty())
-            fileChooser.setInitialDirectory(calculateInitialDirectory(ebookFileTextField.getText()));
-        else if (!outputDirTextField.getText().isEmpty())
-            fileChooser.setInitialDirectory(calculateInitialDirectory(outputDirTextField.getText()));
+        if (!ebookfileTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(ebookfileTextField.getText()));
+        else if (!outputdirTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(outputdirTextField.getText()));
 
         fileChooser.setTitle("Open eBook File");
 
-        File file = fileChooser.showOpenDialog(ebookFileButton.getScene().getWindow());
+        File file = fileChooser.showOpenDialog(selectEbookfileButton.getScene().getWindow());
 
         if (file != null) {
-            ebookFileTextField.setText(file.toString());
-            if (outputDirTextField.getText().isEmpty()) outputDirTextField.setText(file.getParent());
+            ebookfileTextField.setText(file.toString());
+            if (outputdirTextField.getText().isEmpty()) outputdirTextField.setText(file.getParent());
         }
     }
 
 
-    private void selectOutputDir() {
+    private void selectOutputdir() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
 
-        if (outputDirTextField.getText().isEmpty() && !ebookFileTextField.getText().isEmpty())
-            directoryChooser.setInitialDirectory(calculateInitialDirectory(ebookFileTextField.getText()));
-        else if (!outputDirTextField.getText().isEmpty())
-            directoryChooser.setInitialDirectory(calculateInitialDirectory(outputDirTextField.getText()));
+        if (outputdirTextField.getText().isEmpty() && !ebookfileTextField.getText().isEmpty())
+            directoryChooser.setInitialDirectory(calculateInitialDirectory(ebookfileTextField.getText()));
+        else if (!outputdirTextField.getText().isEmpty())
+            directoryChooser.setInitialDirectory(calculateInitialDirectory(outputdirTextField.getText()));
 
         directoryChooser.setTitle("Select Output Directory");
 
-        File outputDir = directoryChooser.showDialog(outputDirButton.getScene().getWindow());
+        File outputDir = directoryChooser.showDialog(selectOutputdirButton.getScene().getWindow());
 
-        if (outputDir != null) outputDirTextField.setText(outputDir.toString());
+        if (outputDir != null) outputdirTextField.setText(outputDir.toString());
     }
 
-    private void deriveOutputDir() {
-        File file = new File(ebookFileTextField.getText());
+    private void deriveOutputdir() {
+        File file = new File(ebookfileTextField.getText());
 
-        if (file.isFile()) outputDirTextField.setText(file.getParent());
+        if (file.isFile()) outputdirTextField.setText(file.getParent());
     }
 
 
-    private void selectKeyFile() {
+    private void selectKeyfile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i", "*.json");
         fileChooser.getExtensionFilters().add(filter);
 
-        if (!keyFileTextField.getText().isEmpty())
-            fileChooser.setInitialDirectory(calculateInitialDirectory(keyFileTextField.getText()));
+        if (!keyfileTextField.getText().isEmpty())
+            fileChooser.setInitialDirectory(calculateInitialDirectory(keyfileTextField.getText()));
 
         fileChooser.setTitle("Select Key File");
 
-        File keyFile = fileChooser.showOpenDialog(keyFileButton.getScene().getWindow());
+        File keyFile = fileChooser.showOpenDialog(selectKeyfileButton.getScene().getWindow());
 
-        if (keyFile != null) keyFileTextField.setText(keyFile.toString());
+        if (keyFile != null) keyfileTextField.setText(keyFile.toString());
     }
 
-    private void generateKeyFile() {
+    private void generateKeyfile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
         fileChooser.getExtensionFilters().add(filter);
         fileChooser.setTitle("Generate Key File");
 
-        File keyFile = fileChooser.showSaveDialog(generateK4iButton.getScene().getWindow());
+        File keyFile = fileChooser.showSaveDialog(generateKeyfileButton.getScene().getWindow());
 
         if (keyFile != null) {
             if (DeDRM.generateKeyfile(keyFile.toString())) {
-                keyFileTextField.setText(keyFile.toString());
+                keyfileTextField.setText(keyFile.toString());
                 System.out.printf("Generated key file: %s%n", keyFile);
             } else System.err.println("Error generating key file");
         }
     }
 
-    private void generateKeyFileThrowing() {
+    private void generateKeyfileThrowing() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
         fileChooser.getExtensionFilters().add(filter);
         fileChooser.setTitle("Generate Key File");
 
-        File keyFile = fileChooser.showSaveDialog(generateK4iButton.getScene().getWindow());
+        File keyFile = fileChooser.showSaveDialog(generateKeyfileButton.getScene().getWindow());
 
         if (keyFile != null) {
             ExecutorService executor = Executors.newSingleThreadExecutor();
+
             executor.submit(() -> {
                 try {
                     Platform.runLater(() -> isGeneratingKeyfile.set(true));
                     DeDRM.generateKeyfileThrowing(keyFile.toString());
-                    Platform.runLater(() -> keyFileTextField.setText(keyFile.toString()));
+                    Platform.runLater(() -> keyfileTextField.setText(keyFile.toString()));
                     System.out.printf("Generated key file: %s%n", keyFile);
                 } catch (Exception e) {
                     System.err.printf("Error generating key file: %s%n", e.getMessage());
@@ -315,7 +370,7 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void saveSettings() {
-        SettingsDict settings = new SettingsDict(ebookFileTextField.getText(), outputDirTextField.getText(), keyFileTextField.getText(), serialTextField.getText());
+        SettingsDict settings = new SettingsDict(ebookfileTextField.getText(), outputdirTextField.getText(), keyfileTextField.getText(), serialTextField.getText());
 
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".json Files", "*.json");
@@ -349,9 +404,9 @@ final class KindleDeDRMController extends VBox {
             try {
                 SettingsDict settings = new SettingsDict(settingsFile);
 
-                ebookFileTextField.setText(settings.getInputFile());
-                outputDirTextField.setText(settings.getOutputFile());
-                keyFileTextField.setText(settings.getKeyFile());
+                ebookfileTextField.setText(settings.getInputFile());
+                outputdirTextField.setText(settings.getOutputFile());
+                keyfileTextField.setText(settings.getKeyFile());
                 serialTextField.setText(settings.getSerial());
             } catch (Exception e) {
                 System.err.printf("Error loading settings file: %s%n", e.getMessage());
@@ -363,16 +418,16 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void resetSettings() {
-        ebookFileTextField.clear();
-        outputDirTextField.clear();
-        keyFileTextField.clear();
+        ebookfileTextField.clear();
+        outputdirTextField.clear();
+        keyfileTextField.clear();
         serialTextField.clear();
     }
 
     private void decryptBook() {
-        String infile = ebookFileTextField.getText();
-        String outdir = outputDirTextField.getText();
-        String keyfile = keyFileTextField.getText();
+        String infile = ebookfileTextField.getText();
+        String outdir = outputdirTextField.getText();
+        String keyfile = keyfileTextField.getText();
         String serial = serialTextField.getText();
 
         Debug.printf("Input File: %s%n", infile);
@@ -384,9 +439,9 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void decryptBookThrowing() {
-        String infile = ebookFileTextField.getText();
-        String outdir = outputDirTextField.getText();
-        String keyfile = keyFileTextField.getText();
+        String infile = ebookfileTextField.getText();
+        String outdir = outputdirTextField.getText();
+        String keyfile = keyfileTextField.getText();
         String serial = serialTextField.getText();
 
         Debug.printf("Input File: %s%n", infile);
@@ -395,6 +450,7 @@ final class KindleDeDRMController extends VBox {
         Debug.printf("Serial: %s%n", serial);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
+
         executor.submit(() -> {
             try {
                 Platform.runLater(() -> isDecrypting.set(true));
@@ -410,7 +466,7 @@ final class KindleDeDRMController extends VBox {
     }
 
     private void clearLogs() {
-        textArea.clear();
+        consoleOutputTextArea.clear();
     }
 
     private File calculateInitialDirectory(String text) {

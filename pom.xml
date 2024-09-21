@@ -11,7 +11,7 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>5.0.0</version>
+        <version>6.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -29,6 +29,12 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>cloud.tavitian</groupId>
+            <artifactId>dedrmtools</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
         <!--        <dependency>-->
         <!--            <groupId>org.openjfx</groupId>-->
@@ -36,11 +42,29 @@
         <!--            <version>${javafx.version}</version>-->
         <!--        </dependency>-->
 
-        <dependency>
-            <groupId>cloud.tavitian</groupId>
-            <artifactId>dedrmtools</artifactId>
-            <version>5.0.0</version>
-        </dependency>
+        <!-- https://mvnrepository.com/artifact/io.github.mkpaz/atlantafx-base -->
+        <!--        <dependency>-->
+        <!--            <groupId>io.github.mkpaz</groupId>-->
+        <!--            <artifactId>atlantafx-base</artifactId>-->
+        <!--            <version>2.0.1</version>-->
+        <!--        </dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
+        <!--        <dependency>-->
+        <!--            <groupId>org.jfxtras</groupId>-->
+        <!--            <artifactId>jmetro</artifactId>-->
+        <!--            <version>11.6.16</version>-->
+        <!--            <exclusions>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.controlsfx</groupId>-->
+        <!--                    <artifactId>controlsfx</artifactId>-->
+        <!--                </exclusion>-->
+        <!--                <exclusion>-->
+        <!--                    <groupId>org.openjfx</groupId>-->
+        <!--                    <artifactId>*</artifactId>-->
+        <!--                </exclusion>-->
+        <!--            </exclusions>-->
+        <!--        </dependency>-->
     </dependencies>
 
     <build>
@@ -135,6 +159,7 @@
                                     <jlinkImageName>app-mac</jlinkImageName>
                                     <jlinkZipName>app-mac</jlinkZipName>
                                     <jmodsPath>../jmods/${maven.compiler.target}/mac</jmodsPath>
+                                    <jlinkExecutable>/Users/paultavitian/Java JDKs/${maven.compiler.target}/macOS/x64/jdk-${maven.compiler.target}.jdk/Contents/Home/bin/jlink</jlinkExecutable>
                                 </configuration>
                             </execution>
                         </executions>
