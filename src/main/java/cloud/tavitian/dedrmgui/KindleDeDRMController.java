@@ -21,6 +21,7 @@ import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,8 +44,8 @@ final class KindleDeDRMController {
     private final Label serialLabel = new Label("Serial");
     private final TextField serialTextField = new TextField();
     private final HBox serialHBox = new HBox(5.0, serialLabel, serialTextField);
-    private final Label keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
     private final VBox keySerialVBox = new VBox(5.0, keyfileHBox, serialHBox);
+    private final Label keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
     private final Button decryptButton = new Button("Decrypt");
     private final CheckBox verboseCheckbox = new CheckBox("Verbose");
     private final HBox decryptVerboseHBox = new HBox(5.0, decryptButton, verboseCheckbox);
@@ -63,24 +64,25 @@ final class KindleDeDRMController {
     private final BooleanProperty isGeneratingKeyfile = new SimpleBooleanProperty(false);
 
     private final BooleanBinding isDecryptingOrGeneratingKeyfile = isDecrypting.or(isGeneratingKeyfile);
+    private final BooleanBinding rootVBoxDisabled = isDecryptingOrGeneratingKeyfile;
     private final BooleanBinding ebookfileTextFieldEmpty = ebookfileTextField.textProperty().isEmpty();
+    private final BooleanBinding deriveOutputdirDisabled = ebookfileTextFieldEmpty;
     private final BooleanBinding outputdirTextFieldEmpty = outputdirTextField.textProperty().isEmpty();
-    private final BooleanBinding keyfileTextFieldEmpty = keyfileTextField.textProperty().isEmpty();
-    private final BooleanBinding serialTextFieldEmpty = serialTextField.textProperty().isEmpty();
-    private final BooleanBinding consoleOutputTextAreaEmpty = consoleOutputTextArea.textProperty().isEmpty();
-
     private final BooleanBinding ebookfileAndOutputdirEmpty = ebookfileTextFieldEmpty.and(outputdirTextFieldEmpty);
     private final BooleanBinding ebookfileOrOutputdirEmpty = ebookfileTextFieldEmpty.or(outputdirTextFieldEmpty);
+    private final BooleanBinding keyfileTextFieldEmpty = keyfileTextField.textProperty().isEmpty();
+    private final BooleanBinding serialTextFieldEmpty = serialTextField.textProperty().isEmpty();
     private final BooleanBinding keyAndSerialEmpty = keyfileTextFieldEmpty.and(serialTextFieldEmpty);
-    private final BooleanBinding keyOrSerialEmpty = keyfileTextFieldEmpty.or(serialTextFieldEmpty);
     private final BooleanBinding allFieldsEmpty = ebookfileAndOutputdirEmpty.and(keyAndSerialEmpty);
-
-    private final BooleanBinding deriveOutputdirDisabled = ebookfileTextFieldEmpty;
-    private final BooleanBinding clearLogsDisabled = consoleOutputTextAreaEmpty;
-    private final BooleanBinding decryptDisabled = ebookfileOrOutputdirEmpty.or(keyAndSerialEmpty);
     private final BooleanBinding saveResetDisabled = allFieldsEmpty;
+    private final BooleanBinding decryptDisabled = ebookfileOrOutputdirEmpty.or(keyAndSerialEmpty);
     private final BooleanBinding keyOrSerialRequiredVisible = keyAndSerialEmpty;
-    private final BooleanBinding rootVBoxDisabled = isDecryptingOrGeneratingKeyfile;
+
+    @SuppressWarnings("unused")
+    private final BooleanBinding keyOrSerialEmpty = keyfileTextFieldEmpty.or(serialTextFieldEmpty);
+
+    private final BooleanBinding consoleOutputTextAreaEmpty = consoleOutputTextArea.textProperty().isEmpty();
+    private final BooleanBinding clearLogsDisabled = consoleOutputTextAreaEmpty;
 
     KindleDeDRMController() {
         configureNodes();
@@ -141,12 +143,12 @@ final class KindleDeDRMController {
     }
 
     private void configureClearLogsButton() {
-        clearLogsButton.setOnAction(event -> clearLogs());
+        clearLogsButton.setOnAction(_ -> clearLogs());
         clearLogsButton.disableProperty().bind(clearLogsDisabled);
     }
 
     private void configureVerboseCheckbox() {
-        verboseCheckbox.setOnAction(event -> Debug.setEnabled(verboseCheckbox.isSelected()));
+        verboseCheckbox.setOnAction(_ -> Debug.setEnabled(verboseCheckbox.isSelected()));
     }
 
     private void configureConsoleOutputTextArea() {
@@ -158,7 +160,7 @@ final class KindleDeDRMController {
     }
 
     private void configureDecryptButton() {
-        decryptButton.setOnAction(event -> decryptBookThrowing());
+        decryptButton.setOnAction(_ -> decryptBookThrowing());
         decryptButton.disableProperty().bind(decryptDisabled);
     }
 
@@ -167,16 +169,16 @@ final class KindleDeDRMController {
     }
 
     private void configureResetSettingsButton() {
-        resetSettingsButton.setOnAction(event -> resetSettings());
+        resetSettingsButton.setOnAction(_ -> resetSettings());
         resetSettingsButton.disableProperty().bind(saveResetDisabled);
     }
 
     private void configureLoadSettingsButton() {
-        loadSettingsButton.setOnAction(event -> loadSettings());
+        loadSettingsButton.setOnAction(_ -> loadSettings());
     }
 
     private void configureSaveSettingsButton() {
-        saveSettingsButton.setOnAction(event -> saveSettings());
+        saveSettingsButton.setOnAction(_ -> saveSettings());
         saveSettingsButton.disableProperty().bind(saveResetDisabled);
     }
 
@@ -211,11 +213,11 @@ final class KindleDeDRMController {
         tooltip.setHideDelay(Duration.ZERO);
 
         generateKeyfileButton.setTooltip(tooltip);
-        generateKeyfileButton.setOnAction(event -> generateKeyfileThrowing());
+        generateKeyfileButton.setOnAction(_ -> generateKeyfileThrowing());
     }
 
     private void configureSelectKeyfileButton() {
-        selectKeyfileButton.setOnAction(event -> selectKeyfile());
+        selectKeyfileButton.setOnAction(_ -> selectKeyfile());
     }
 
     private void configureKeyfileTextField() {
@@ -235,12 +237,12 @@ final class KindleDeDRMController {
     }
 
     private void configureDeriveOutputdirButton() {
-        deriveOutputdirButton.setOnAction(event -> deriveOutputdir());
+        deriveOutputdirButton.setOnAction(_ -> deriveOutputdir());
         deriveOutputdirButton.disableProperty().bind(deriveOutputdirDisabled);
     }
 
     private void configureSelectOutputdirButton() {
-        selectOutputdirButton.setOnAction(event -> selectOutputdir());
+        selectOutputdirButton.setOnAction(_ -> selectOutputdir());
     }
 
     private void configureOutputdirTextField() {
@@ -254,7 +256,7 @@ final class KindleDeDRMController {
     }
 
     private void configureSelectEbookfileButton() {
-        selectEbookfileButton.setOnAction(event -> selectEbookfile());
+        selectEbookfileButton.setOnAction(_ -> selectEbookfile());
     }
 
     private void configureEbookfileTextField() {
@@ -325,6 +327,7 @@ final class KindleDeDRMController {
         if (keyFile != null) keyfileTextField.setText(keyFile.toString());
     }
 
+    @SuppressWarnings("unused")
     private void generateKeyfile() {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
@@ -370,6 +373,7 @@ final class KindleDeDRMController {
     }
 
     private void saveSettings() {
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         SettingsDict settings = new SettingsDict(ebookfileTextField.getText(), outputdirTextField.getText(), keyfileTextField.getText(), serialTextField.getText());
 
         FileChooser fileChooser = new FileChooser();
@@ -383,7 +387,7 @@ final class KindleDeDRMController {
         if (settingsFile != null) {
             try {
                 settings.writeToFile(settingsFile);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.printf("Error saving settings file: %s%n", e.getMessage());
                 return;
             }
@@ -402,13 +406,14 @@ final class KindleDeDRMController {
 
         if (settingsFile != null) {
             try {
+                @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
                 SettingsDict settings = new SettingsDict(settingsFile);
 
                 ebookfileTextField.setText(settings.getInputFile());
                 outputdirTextField.setText(settings.getOutputFile());
                 keyfileTextField.setText(settings.getKeyFile());
                 serialTextField.setText(settings.getSerial());
-            } catch (Exception e) {
+            } catch (IOException e) {
                 System.err.printf("Error loading settings file: %s%n", e.getMessage());
                 return;
             }
@@ -424,6 +429,7 @@ final class KindleDeDRMController {
         serialTextField.clear();
     }
 
+    @SuppressWarnings("unused")
     private void decryptBook() {
         String infile = ebookfileTextField.getText();
         String outdir = outputdirTextField.getText();

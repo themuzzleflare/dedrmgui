@@ -11,12 +11,10 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>6.0.0</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>7.0.0</version>
     </parent>
 
     <artifactId>dedrmgui</artifactId>
-    <packaging>jar</packaging>
 
     <name>Kindle DeDRM GUI</name>
     <description>Graphical User Interface for the Kindle DeDRM tools.</description>
@@ -26,44 +24,29 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${javafx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>cloud.tavitian</groupId>
             <artifactId>dedrmtools</artifactId>
-            <version>6.0.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
         <!--        <dependency>-->
         <!--            <groupId>org.openjfx</groupId>-->
         <!--            <artifactId>javafx-fxml</artifactId>-->
-        <!--            <version>${javafx.version}</version>-->
         <!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/io.github.mkpaz/atlantafx-base -->
         <!--        <dependency>-->
         <!--            <groupId>io.github.mkpaz</groupId>-->
         <!--            <artifactId>atlantafx-base</artifactId>-->
-        <!--            <version>2.0.1</version>-->
         <!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
         <!--        <dependency>-->
         <!--            <groupId>org.jfxtras</groupId>-->
         <!--            <artifactId>jmetro</artifactId>-->
-        <!--            <version>11.6.16</version>-->
-        <!--            <exclusions>-->
-        <!--                <exclusion>-->
-        <!--                    <groupId>org.controlsfx</groupId>-->
-        <!--                    <artifactId>controlsfx</artifactId>-->
-        <!--                </exclusion>-->
-        <!--                <exclusion>-->
-        <!--                    <groupId>org.openjfx</groupId>-->
-        <!--                    <artifactId>*</artifactId>-->
-        <!--                </exclusion>-->
-        <!--            </exclusions>-->
         <!--        </dependency>-->
     </dependencies>
 
@@ -73,7 +56,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -105,7 +87,7 @@
 
     <profiles>
         <profile>
-            <id>mac-aarch64</id>
+            <id>dedrmgui-macaarch64-jlink</id>
             <activation>
                 <os>
                     <name>Mac OS X</name>
@@ -135,8 +117,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
-            <id>mac</id>
+            <id>dedrmgui-mac-jlink</id>
             <activation>
                 <os>
                     <name>Mac OS X</name>
@@ -167,8 +150,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
-            <id>win</id>
+            <id>dedrmgui-win-jlink</id>
             <activation>
                 <os>
                     <family>windows</family>
@@ -197,8 +181,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
-            <id>linux-aarch64</id>
+            <id>dedrmgui-linuxaarch64-jlink</id>
             <activation>
                 <os>
                     <name>Linux</name>
@@ -228,8 +213,9 @@
                 </plugins>
             </build>
         </profile>
+
         <profile>
-            <id>linux</id>
+            <id>dedrmgui-linux-jlink</id>
             <activation>
                 <os>
                     <name>Linux</name>

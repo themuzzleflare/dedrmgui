@@ -13,12 +13,12 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 
 final class SettingsDict extends LinkedHashMap<String, String> {
-    private static final Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
-    private static final String inputFileKey = "inputFile";
-    private static final String outputFileKey = "outputFile";
-    private static final String keyFileKey = "keyFile";
-    private static final String serialKey = "serial";
+    private static final String INPUTFILE_KEY = "inputFile";
+    private static final String OUTPUTFILE_KEY = "outputFile";
+    private static final String KEYFILE_KEY = "keyFile";
+    private static final String SERIAL_KEY = "serial";
 
     public SettingsDict() {
         super();
@@ -46,7 +46,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     }
 
     public static SettingsDict loadFromFile(String filename) throws IOException {
-        return gson.fromJson(new FileReader(filename), SettingsDict.class);
+        return GSON.fromJson(new FileReader(filename), SettingsDict.class);
     }
 
     public void writeToFile(File file) throws IOException {
@@ -54,40 +54,40 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     }
 
     public void writeToFile(String filename) throws IOException {
-        FileWriter fileWriter = new FileWriter(filename);
-        gson.toJson(this, fileWriter);
-        fileWriter.close();
+        try (FileWriter fileWriter = new FileWriter(filename)) {
+            GSON.toJson(this, fileWriter);
+        }
     }
 
     public String getInputFile() {
-        return get(inputFileKey);
+        return get(INPUTFILE_KEY);
     }
 
     public void setInputFile(String inputFile) {
-        put(inputFileKey, inputFile);
+        put(INPUTFILE_KEY, inputFile);
     }
 
     public String getOutputFile() {
-        return get(outputFileKey);
+        return get(OUTPUTFILE_KEY);
     }
 
     public void setOutputFile(String outputFile) {
-        put(outputFileKey, outputFile);
+        put(OUTPUTFILE_KEY, outputFile);
     }
 
     public String getKeyFile() {
-        return get(keyFileKey);
+        return get(KEYFILE_KEY);
     }
 
     public void setKeyFile(String keyFile) {
-        put(keyFileKey, keyFile);
+        put(KEYFILE_KEY, keyFile);
     }
 
     public String getSerial() {
-        return get(serialKey);
+        return get(SERIAL_KEY);
     }
 
     public void setSerial(String serial) {
-        put(serialKey, serial);
+        put(SERIAL_KEY, serial);
     }
 }

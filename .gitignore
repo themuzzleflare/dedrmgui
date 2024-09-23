@@ -36,5 +36,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/jpackage-scripts/
-/notarytool-scripts/
+
+### Other ###
+jpackage-scripts/
+notarytool-scripts/

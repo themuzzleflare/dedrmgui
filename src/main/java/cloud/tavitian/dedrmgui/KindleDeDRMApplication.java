@@ -11,12 +11,11 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
 public final class KindleDeDRMApplication extends Application {
-    private static final String osName = System.getProperty("os.name").toLowerCase();
+    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
 
     public static void main(String[] args) {
         launch(args);
@@ -25,7 +24,7 @@ public final class KindleDeDRMApplication extends Application {
     private static Image[] getIcons() {
         String path;
 
-        if (osName.startsWith("mac") || osName.startsWith("darwin")) {
+        if (OS_NAME.startsWith("mac") || OS_NAME.startsWith("darwin")) {
             path = "macos";
         } else {
             path = "all";
@@ -45,7 +44,7 @@ public final class KindleDeDRMApplication extends Application {
         };
 
         InputStream[] iconStreams = Arrays.stream(filenames)
-                .map(filename -> Path.of(path, filename).toString())
+                .map(filename -> String.format("%s/%s", path, filename))
                 .map(KindleDeDRMApplication.class::getResourceAsStream)
                 .filter(Objects::nonNull)
                 .toArray(InputStream[]::new);
