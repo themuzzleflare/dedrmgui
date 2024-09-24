@@ -20,6 +20,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     private static final String KEYFILE_KEY = "keyFile";
     private static final String SERIAL_KEY = "serial";
 
+    @SuppressWarnings("unused")
     public SettingsDict() {
         super();
     }
@@ -41,6 +42,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         setSerial(serial);
     }
 
+    @SuppressWarnings("unused")
     public static SettingsDict loadFromFile(File file) throws IOException {
         return loadFromFile(file.getAbsolutePath());
     }

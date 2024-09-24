@@ -39,6 +39,7 @@ final class Spacer extends Region {
      *
      * @param size The size of the spacer.
      */
+    @SuppressWarnings("unused")
     public Spacer(double size) {
         this(size, Orientation.HORIZONTAL);
     }

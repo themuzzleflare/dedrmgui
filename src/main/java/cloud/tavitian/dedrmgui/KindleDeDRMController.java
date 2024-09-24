@@ -15,6 +15,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -22,6 +24,7 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,27 +47,36 @@ final class KindleDeDRMController {
     private final Label serialLabel = new Label("Serial");
     private final TextField serialTextField = new TextField();
     private final HBox serialHBox = new HBox(5.0, serialLabel, serialTextField);
-    private final VBox keySerialVBox = new VBox(5.0, keyfileHBox, serialHBox);
     private final Label keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
+    private final VBox keySerialVBox = new VBox(5.0, keyfileHBox, serialHBox, keyOrSerialRequiredLabel);
     private final Button decryptButton = new Button("Decrypt");
     private final CheckBox verboseCheckbox = new CheckBox("Verbose");
     private final HBox decryptVerboseHBox = new HBox(5.0, decryptButton, verboseCheckbox);
     private final Button clearLogsButton = new Button("Clear Logs");
     private final HBox decryptVerboseClearLogsHBox = new HBox(5.0, decryptVerboseHBox, new Spacer(), clearLogsButton);
     private final TextArea consoleOutputTextArea = new TextArea();
+
     private final VBox consoleDecryptVBox = new VBox(5.0, consoleOutputTextArea, decryptVerboseClearLogsHBox);
-    private final TextAreaPrintStream printStream = new TextAreaPrintStream(consoleOutputTextArea);
+    private final TextAreaOutputStream taOutputStream = new TextAreaOutputStream(consoleOutputTextArea);
+    private final PrintStream printStream = new PrintStream(taOutputStream, true);
     private final Button saveSettingsButton = new Button("Save Settings");
     private final Button loadSettingsButton = new Button("Load Settings");
     private final Button resetSettingsButton = new Button("Reset");
     private final HBox settingsHBox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetSettingsButton);
-    final VBox rootVBox = new VBox(20.0, inputOutputVBox, keySerialVBox, settingsHBox, consoleDecryptVBox);
+    private final VBox rootVBox = new VBox(20.0, inputOutputVBox, keySerialVBox, settingsHBox, consoleDecryptVBox);
+    private final Rectangle semiTransparentOverlay = new Rectangle();
+    private final ProgressIndicator progressIndicator = new ProgressIndicator();
+    final StackPane rootStackPane = new StackPane(rootVBox, semiTransparentOverlay, progressIndicator);
 
     private final BooleanProperty isDecrypting = new SimpleBooleanProperty(false);
     private final BooleanProperty isGeneratingKeyfile = new SimpleBooleanProperty(false);
 
     private final BooleanBinding isDecryptingOrGeneratingKeyfile = isDecrypting.or(isGeneratingKeyfile);
+
+    @SuppressWarnings("unused")
     private final BooleanBinding rootVBoxDisabled = isDecryptingOrGeneratingKeyfile;
+
+    private final BooleanBinding showProgress = isDecryptingOrGeneratingKeyfile;
     private final BooleanBinding ebookfileTextFieldEmpty = ebookfileTextField.textProperty().isEmpty();
     private final BooleanBinding deriveOutputdirDisabled = ebookfileTextFieldEmpty;
     private final BooleanBinding outputdirTextFieldEmpty = outputdirTextField.textProperty().isEmpty();
@@ -117,12 +129,31 @@ final class KindleDeDRMController {
         configureDecryptVerboseHBox();
         configureDecryptVerboseClearLogsHBox();
         configureConsoleDecryptVBox();
+        configureSemiTransparentOverlay();
+        configureProgressIndicator();
         configureRootVBox();
+        configureRootStackPane();
     }
 
     private void configureRootVBox() {
         rootVBox.setPadding(new Insets(10.0));
-        rootVBox.disableProperty().bind(rootVBoxDisabled);
+        rootVBox.disableProperty().bind(showProgress);
+    }
+
+    private void configureRootStackPane() {
+    }
+
+    private void configureProgressIndicator() {
+        progressIndicator.visibleProperty().bind(showProgress);
+        progressIndicator.managedProperty().bind(showProgress); // Ensures it doesn't take up space when hidden
+    }
+
+    private void configureSemiTransparentOverlay() {
+        semiTransparentOverlay.setFill(Color.rgb(0, 0, 0, 0.5)); // Semi-transparent black
+        semiTransparentOverlay.widthProperty().bind(rootStackPane.widthProperty());
+        semiTransparentOverlay.heightProperty().bind(rootStackPane.heightProperty());
+        semiTransparentOverlay.visibleProperty().bind(showProgress);
+        semiTransparentOverlay.managedProperty().bind(showProgress);
     }
 
     private void configurePrintStream() {
@@ -155,6 +186,7 @@ final class KindleDeDRMController {
         consoleOutputTextArea.setEditable(false);
         consoleOutputTextArea.setWrapText(true);
         consoleOutputTextArea.setPromptText("Console Output");
+        consoleOutputTextArea.setFont(Util.consoleOutputFont());
 
         VBox.setVgrow(consoleOutputTextArea, Priority.ALWAYS);
     }
@@ -191,6 +223,8 @@ final class KindleDeDRMController {
     private void configureKeyOrSerialRequiredLabel() {
         keyOrSerialRequiredLabel.setTextAlignment(TextAlignment.CENTER);
         keyOrSerialRequiredLabel.visibleProperty().bind(keyOrSerialRequiredVisible);
+        keyOrSerialRequiredLabel.managedProperty().bind(keyOrSerialRequiredVisible);
+        keyOrSerialRequiredLabel.setFont(Font.font(12.0));
     }
 
     private void configureSerialHBox() {
@@ -265,8 +299,8 @@ final class KindleDeDRMController {
         HBox.setHgrow(ebookfileTextField, Priority.ALWAYS);
     }
 
-    VBox getRootVBox() {
-        return rootVBox;
+    StackPane getRootStackPane() {
+        return rootStackPane;
     }
 
     private void selectEbookfile() {
@@ -353,9 +387,7 @@ final class KindleDeDRMController {
         File keyFile = fileChooser.showSaveDialog(generateKeyfileButton.getScene().getWindow());
 
         if (keyFile != null) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-
-            executor.submit(() -> {
+            Runnable task = () -> {
                 try {
                     Platform.runLater(() -> isGeneratingKeyfile.set(true));
                     DeDRM.generateKeyfileThrowing(keyFile.toString());
@@ -366,8 +398,11 @@ final class KindleDeDRMController {
                 } finally {
                     Platform.runLater(() -> isGeneratingKeyfile.set(false));
                 }
-            });
+            };
 
+            @SuppressWarnings("resource")
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.submit(task);
             executor.shutdown();
         }
     }
@@ -455,19 +490,22 @@ final class KindleDeDRMController {
         Debug.printf("Key File: %s%n", keyfile);
         Debug.printf("Serial: %s%n", serial);
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Runnable task = () -> {
+            Platform.runLater(() -> isDecrypting.set(true));
 
-        executor.submit(() -> {
             try {
-                Platform.runLater(() -> isDecrypting.set(true));
                 DeDRM.decryptBookWithKDatabaseAndSerialThrowing(infile, outdir, keyfile, serial);
             } catch (Exception e) {
                 System.err.printf("Error decrypting book: %s%n", e.getMessage());
             } finally {
                 Platform.runLater(() -> isDecrypting.set(false));
             }
-        });
+        };
 
+        @SuppressWarnings("resource")
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        executor.submit(task);
         executor.shutdown();
     }
 
