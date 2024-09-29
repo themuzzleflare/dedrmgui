@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+@SuppressWarnings("unused")
 final class TextAreaOutputStream extends OutputStream {
     private static final int FLUSH_THRESHOLD = 8192; // Flush when buffer reaches this size
     private final TextArea textArea;

@@ -22,52 +22,73 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-final class KindleDeDRMController {
+final class KindleDeDRMController implements Closeable {
     private final Label ebookfileLabel = new Label("eBook File");
     private final TextField ebookfileTextField = new TextField();
     private final Button selectEbookfileButton = new Button("Select");
+
     private final HBox ebookfileHBox = new HBox(5.0, ebookfileLabel, ebookfileTextField, selectEbookfileButton);
+
     private final Label outputdirLabel = new Label("Output Directory");
     private final TextField outputdirTextField = new TextField();
     private final Button selectOutputdirButton = new Button("Select");
     private final Button deriveOutputdirButton = new Button("Derive");
+
     private final HBox outputdirHBox = new HBox(5.0, outputdirLabel, outputdirTextField, selectOutputdirButton, deriveOutputdirButton);
     private final VBox inputOutputVBox = new VBox(5.0, ebookfileHBox, outputdirHBox);
+
     private final Label keyfileLabel = new Label("Key File");
     private final TextField keyfileTextField = new TextField();
     private final Button selectKeyfileButton = new Button("Select");
     private final Button generateKeyfileButton = new Button("Generate");
+
     private final HBox keyfileHBox = new HBox(5.0, keyfileLabel, keyfileTextField, selectKeyfileButton, generateKeyfileButton);
+
     private final Label serialLabel = new Label("Serial");
     private final TextField serialTextField = new TextField();
+
     private final HBox serialHBox = new HBox(5.0, serialLabel, serialTextField);
     private final Label keyOrSerialRequiredLabel = new Label("Either a Key File or Serial Number must be provided.");
     private final VBox keySerialVBox = new VBox(5.0, keyfileHBox, serialHBox, keyOrSerialRequiredLabel);
     private final Button decryptButton = new Button("Decrypt");
     private final CheckBox verboseCheckbox = new CheckBox("Verbose");
+
     private final HBox decryptVerboseHBox = new HBox(5.0, decryptButton, verboseCheckbox);
     private final Button clearLogsButton = new Button("Clear Logs");
-    private final HBox decryptVerboseClearLogsHBox = new HBox(5.0, decryptVerboseHBox, new Spacer(), clearLogsButton);
     private final TextArea consoleOutputTextArea = new TextArea();
-
+    private final HBox decryptVerboseClearLogsHBox = new HBox(5.0, decryptVerboseHBox, new Spacer(), clearLogsButton);
     private final VBox consoleDecryptVBox = new VBox(5.0, consoleOutputTextArea, decryptVerboseClearLogsHBox);
-    private final TextAreaOutputStream taOutputStream = new TextAreaOutputStream(consoleOutputTextArea);
+    private final OutputStream taOutputStream = new BufferedTextAreaOutputStream(consoleOutputTextArea);
     private final PrintStream printStream = new PrintStream(taOutputStream, true);
+
     private final Button saveSettingsButton = new Button("Save Settings");
     private final Button loadSettingsButton = new Button("Load Settings");
     private final Button resetSettingsButton = new Button("Reset");
+
     private final HBox settingsHBox = new HBox(5.0, saveSettingsButton, loadSettingsButton, resetSettingsButton);
-    private final VBox rootVBox = new VBox(20.0, inputOutputVBox, keySerialVBox, settingsHBox, consoleDecryptVBox);
+
+    private final MenuItem decryptMenuItem = new MenuItem("Decrypt");
+    private final MenuItem generateKeyfileMenuItem = new MenuItem("Generate Keyfile");
+    private final MenuItem clearLogsMenuItem = new MenuItem("Clear Logs");
+
+    private final MenuItem saveSettingsMenuItem = new MenuItem("Save Settings");
+    private final MenuItem loadSettingsMenuItem = new MenuItem("Load Settings");
+    private final MenuItem resetSettingsMenuItem = new MenuItem("Reset Settings");
+
+    private final Menu runMenu = new Menu("Run", null, decryptMenuItem, generateKeyfileMenuItem, clearLogsMenuItem);
+    private final Menu settingsMenu = new Menu("Settings", null, saveSettingsMenuItem, loadSettingsMenuItem, resetSettingsMenuItem);
+
+    private final MenuBar menuBar = new MenuBar(runMenu, settingsMenu);
+
+    private final VBox rootVBox = new VBox(20.0, menuBar, inputOutputVBox, keySerialVBox, settingsHBox, consoleDecryptVBox);
+    private final VBox rootVBoxWithMenuBar = new VBox(menuBar, rootVBox);
     private final Rectangle semiTransparentOverlay = new Rectangle();
     private final ProgressIndicator progressIndicator = new ProgressIndicator();
-    final StackPane rootStackPane = new StackPane(rootVBox, semiTransparentOverlay, progressIndicator);
-
+    private final StackPane rootStackPane = new StackPane(rootVBoxWithMenuBar, semiTransparentOverlay, progressIndicator);
     private final BooleanProperty isDecrypting = new SimpleBooleanProperty(false);
     private final BooleanProperty isGeneratingKeyfile = new SimpleBooleanProperty(false);
 
@@ -132,15 +153,53 @@ final class KindleDeDRMController {
         configureSemiTransparentOverlay();
         configureProgressIndicator();
         configureRootVBox();
-        configureRootStackPane();
+        configureDecryptMenuItem();
+        configureGenerateKeyfileMenuItem();
+        configureClearLogsMenuItem();
+        configureSaveSettingsMenuItem();
+        configureLoadSettingsMenuItem();
+        configureResetSettingsMenuItem();
+        configureMenuBar();
+    }
+
+    private void configureMenuBar() {
+        Platform.runLater(() -> menuBar.setUseSystemMenuBar(true));
+    }
+
+    private void configureDecryptMenuItem() {
+        decryptMenuItem.setOnAction(_ -> decryptBookThrowing());
+        decryptMenuItem.disableProperty().bind(decryptDisabled);
+    }
+
+    private void configureGenerateKeyfileMenuItem() {
+        generateKeyfileMenuItem.setOnAction(_ -> generateKeyfileThrowing());
+        generateKeyfileMenuItem.disableProperty().bind(isGeneratingKeyfile);
+    }
+
+    private void configureClearLogsMenuItem() {
+        clearLogsMenuItem.setOnAction(_ -> clearLogs());
+        clearLogsMenuItem.disableProperty().bind(clearLogsDisabled);
+    }
+
+    private void configureSaveSettingsMenuItem() {
+        saveSettingsMenuItem.setOnAction(_ -> saveSettings());
+        saveSettingsMenuItem.disableProperty().bind(saveResetDisabled);
+    }
+
+    private void configureLoadSettingsMenuItem() {
+        loadSettingsMenuItem.setOnAction(_ -> loadSettings());
+    }
+
+    private void configureResetSettingsMenuItem() {
+        resetSettingsMenuItem.setOnAction(_ -> resetSettings());
+        resetSettingsMenuItem.disableProperty().bind(saveResetDisabled);
     }
 
     private void configureRootVBox() {
         rootVBox.setPadding(new Insets(10.0));
         rootVBox.disableProperty().bind(showProgress);
-    }
 
-    private void configureRootStackPane() {
+        VBox.setVgrow(rootVBox, Priority.ALWAYS);
     }
 
     private void configureProgressIndicator() {
@@ -299,7 +358,7 @@ final class KindleDeDRMController {
         HBox.setHgrow(ebookfileTextField, Priority.ALWAYS);
     }
 
-    StackPane getRootStackPane() {
+    public Pane getRootPane() {
         return rootStackPane;
     }
 
@@ -366,6 +425,7 @@ final class KindleDeDRMController {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
         fileChooser.getExtensionFilters().add(filter);
+        fileChooser.setInitialFileName("kindle");
         fileChooser.setTitle("Generate Key File");
 
         File keyFile = fileChooser.showSaveDialog(generateKeyfileButton.getScene().getWindow());
@@ -382,6 +442,7 @@ final class KindleDeDRMController {
         FileChooser fileChooser = new FileChooser();
         FileChooser.ExtensionFilter filter = new FileChooser.ExtensionFilter(".k4i Files", "*.k4i");
         fileChooser.getExtensionFilters().add(filter);
+        fileChooser.setInitialFileName("kindle");
         fileChooser.setTitle("Generate Key File");
 
         File keyFile = fileChooser.showSaveDialog(generateKeyfileButton.getScene().getWindow());
@@ -521,5 +582,11 @@ final class KindleDeDRMController {
         if (file.isDirectory()) return file;
         else if (file.isFile()) return file.getParentFile();
         else return null;
+    }
+
+    @Override
+    public void close() throws IOException {
+        printStream.close();
+        taOutputStream.close();
     }
 }

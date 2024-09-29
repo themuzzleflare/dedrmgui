@@ -39,4 +39,5 @@ build/
 
 ### Other ###
 jpackage-scripts/
+jlink-scripts/
 notarytool-scripts/

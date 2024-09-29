@@ -14,35 +14,60 @@
         <version>8.0.0</version>
     </parent>
 
+    <artifactId>dedrmgui</artifactId>
+
+    <name>Kindle DeDRM GUI</name>
+    <description>Graphical User Interface for the Kindle DeDRM tools.</description>
+    <url>https://github.com/themuzzleflare/dedrmgui</url>
+
     <properties>
+        <resources.dir>src/main/resources</resources.dir>
+
+        <root.fonts.path>fonts</root.fonts.path>
         <root.icons.path>icons</root.icons.path>
-        <macos.icons.path>macos</macos.icons.path>
-        <all.icons.path>all</all.icons.path>
+        <root.macos.icons.path>macos</root.macos.icons.path>
+        <root.all.icons.path>all</root.all.icons.path>
+
+        <fonts.path>**/${root.fonts.path}/**</fonts.path>
+        <macos.icons.path>**/${root.icons.path}/${root.macos.icons.path}/**</macos.icons.path>
+        <all.icons.path>**/${root.icons.path}/${root.all.icons.path}/**</all.icons.path>
+
+        <mac.aarch64.dir>${project.build.directory}/mac-aarch64</mac.aarch64.dir>
+        <mac.dir>${project.build.directory}/mac</mac.dir>
+        <win.dir>${project.build.directory}/win</win.dir>
+        <linux.aarch64.dir>${project.build.directory}/linux-aarch64</linux.aarch64.dir>
+        <linux.dir>${project.build.directory}/linux</linux.dir>
+
+        <mac.aarch64.finalname>${project.artifactId}-${project.version}-mac-aarch64</mac.aarch64.finalname>
+        <mac.finalname>${project.artifactId}-${project.version}-mac</mac.finalname>
+        <win.finalname>${project.artifactId}-${project.version}-win</win.finalname>
+        <linux.aarch64.finalname>${project.artifactId}-${project.version}-linux-aarch64</linux.aarch64.finalname>
+        <linux.finalname>${project.artifactId}-${project.version}-linux</linux.finalname>
+
+        <mac.aarch64.classes.dir>${mac.aarch64.dir}/classes</mac.aarch64.classes.dir>
+        <mac.classes.dir>${mac.dir}/classes</mac.classes.dir>
+        <win.classes.dir>${win.dir}/classes</win.classes.dir>
+        <linux.aarch64.classes.dir>${linux.aarch64.dir}/classes</linux.aarch64.classes.dir>
+        <linux.classes.dir>${linux.dir}/classes</linux.classes.dir>
 
         <java.jdks.path>${user.home}/Java JDKs</java.jdks.path>
         <jmods.path>${user.home}/jmods</jmods.path>
 
-        <mac.jlink.executable>${java.jdks.path}/${java.version}/macOS/x64/jdk-${java.version}.jdk/Contents/Home/bin/jlink</mac.jlink.executable>
+        <mac.aarch64.jlink.executable>
+            ${java.jdks.path}/${java.version}/macOS/aarch64/jdk-${java.version}.jdk/Contents/Home/bin/jlink
+        </mac.aarch64.jlink.executable>
+        <mac.jlink.executable>
+            ${java.jdks.path}/${java.version}/macOS/x64/jdk-${java.version}.jdk/Contents/Home/bin/jlink
+        </mac.jlink.executable>
 
         <mac.aarch64.jmods.path>${jmods.path}/${java.version}/mac-aarch64</mac.aarch64.jmods.path>
         <mac.jmods.path>${jmods.path}/${java.version}/mac</mac.jmods.path>
         <win.jmods.path>${jmods.path}/${java.version}/win</win.jmods.path>
         <linux.aarch64.jmods.path>${jmods.path}/${java.version}/linux-aarch64</linux.aarch64.jmods.path>
         <linux.jmods.path>${jmods.path}/${java.version}/linux</linux.jmods.path>
-
-        <resources.dir>src/main/resources</resources.dir>
-
-        <macos.icons.exclude>**/${root.icons.path}/${macos.icons.path}/**</macos.icons.exclude>
-        <all.icons.exclude>**/${root.icons.path}/${all.icons.path}/**</all.icons.exclude>
     </properties>
 
-    <artifactId>dedrmgui</artifactId>
-
-    <name>Kindle DeDRM GUI</name>
-    <description>Graphical User Interface for the Kindle DeDRM tools.</description>
-
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-controls -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -50,31 +75,41 @@
 
         <dependency>
             <groupId>cloud.tavitian</groupId>
-            <artifactId>dedrmtools</artifactId>
+            <artifactId>nsmenufx</artifactId>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-fxml -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.openjfx</groupId>-->
-        <!--            <artifactId>javafx-fxml</artifactId>-->
-        <!--        </dependency>-->
-
-        <!-- https://mvnrepository.com/artifact/io.github.mkpaz/atlantafx-base -->
-        <!--        <dependency>-->
-        <!--            <groupId>io.github.mkpaz</groupId>-->
-        <!--            <artifactId>atlantafx-base</artifactId>-->
-        <!--        </dependency>-->
-
-        <!-- https://mvnrepository.com/artifact/org.jfxtras/jmetro -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.jfxtras</groupId>-->
-        <!--            <artifactId>jmetro</artifactId>-->
-        <!--        </dependency>-->
+        <dependency>
+            <groupId>cloud.tavitian</groupId>
+            <artifactId>dedrmtools</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${resources.dir}</directory>
+                <includes>
+                    <include>${fonts.path}</include>
+                </includes>
+            </resource>
+        </resources>
+
         <plugins>
-            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-jar-plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>target</directory>
+                            <includes>
+                                <include>**</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -87,7 +122,6 @@
                 </configuration>
             </plugin>
 
-            <!-- https://mvnrepository.com/artifact/org.openjfx/javafx-maven-plugin -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -100,7 +134,7 @@
                     <stripDebug>true</stripDebug>
                     <stripJavaDebugAttributes>true</stripJavaDebugAttributes>
                     <noHeaderFiles>true</noHeaderFiles>
-                    <compress>2</compress>
+                    <compress>9</compress>
                 </configuration>
             </plugin>
         </plugins>
@@ -115,8 +149,54 @@
                     <arch>aarch64</arch>
                 </os>
             </activation>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-mac-aarch64</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${mac.aarch64.classes.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-mac-aarch64-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${mac.aarch64.classes.dir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${resources.dir}</directory>
+                                            <includes>
+                                                <include>${macos.icons.path}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${all.icons.path}</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.openjfx</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
@@ -130,7 +210,9 @@
                                 <configuration>
                                     <jlinkImageName>app-mac-aarch64</jlinkImageName>
                                     <jlinkZipName>app-mac-aarch64</jlinkZipName>
+                                    <jlinkExecutable>${mac.aarch64.jlink.executable}</jlinkExecutable>
                                     <jmodsPath>${mac.aarch64.jmods.path}</jmodsPath>
+                                    <builddir>${mac.aarch64.dir}</builddir>
                                 </configuration>
                             </execution>
                         </executions>
@@ -141,14 +223,61 @@
 
         <profile>
             <id>dedrmgui-mac-jlink</id>
+
             <activation>
                 <os>
                     <name>Mac OS X</name>
                     <arch>x86_64</arch>
                 </os>
             </activation>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-mac</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${mac.classes.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-mac-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${mac.classes.dir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${resources.dir}</directory>
+                                            <includes>
+                                                <include>${macos.icons.path}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${all.icons.path}</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.openjfx</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
@@ -162,8 +291,9 @@
                                 <configuration>
                                     <jlinkImageName>app-mac</jlinkImageName>
                                     <jlinkZipName>app-mac</jlinkZipName>
-                                    <jmodsPath>${mac.jmods.path}</jmodsPath>
                                     <jlinkExecutable>${mac.jlink.executable}</jlinkExecutable>
+                                    <jmodsPath>${mac.jmods.path}</jmodsPath>
+                                    <builddir>${mac.dir}</builddir>
                                 </configuration>
                             </execution>
                         </executions>
@@ -174,13 +304,60 @@
 
         <profile>
             <id>dedrmgui-win-jlink</id>
+
             <activation>
                 <os>
                     <family>windows</family>
                 </os>
             </activation>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-win</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${win.classes.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-win-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${win.classes.dir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${resources.dir}</directory>
+                                            <includes>
+                                                <include>${all.icons.path}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${macos.icons.path}</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.openjfx</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
@@ -195,6 +372,7 @@
                                     <jlinkImageName>app-win</jlinkImageName>
                                     <jlinkZipName>app-win</jlinkZipName>
                                     <jmodsPath>${win.jmods.path}</jmodsPath>
+                                    <builddir>${win.dir}</builddir>
                                 </configuration>
                             </execution>
                         </executions>
@@ -205,14 +383,61 @@
 
         <profile>
             <id>dedrmgui-linuxaarch64-jlink</id>
+
             <activation>
                 <os>
                     <name>Linux</name>
                     <arch>aarch64</arch>
                 </os>
             </activation>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-linux-aarch64</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${linux.aarch64.classes.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-linux-aarch64-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${linux.aarch64.classes.dir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${resources.dir}</directory>
+                                            <includes>
+                                                <include>${all.icons.path}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${macos.icons.path}</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.openjfx</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
@@ -227,6 +452,7 @@
                                     <jlinkImageName>app-linux-aarch64</jlinkImageName>
                                     <jlinkZipName>app-linux-aarch64</jlinkZipName>
                                     <jmodsPath>${linux.aarch64.jmods.path}</jmodsPath>
+                                    <builddir>${linux.aarch64.dir}</builddir>
                                 </configuration>
                             </execution>
                         </executions>
@@ -237,14 +463,61 @@
 
         <profile>
             <id>dedrmgui-linux-jlink</id>
+
             <activation>
                 <os>
                     <name>Linux</name>
                     <arch>x86_64</arch>
                 </os>
             </activation>
+
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>compile-linux</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${linux.classes.dir}</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-linux-resources</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${linux.classes.dir}</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${resources.dir}</directory>
+                                            <includes>
+                                                <include>${all.icons.path}</include>
+                                            </includes>
+                                            <excludes>
+                                                <exclude>${macos.icons.path}</exclude>
+                                            </excludes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
                     <plugin>
                         <groupId>org.openjfx</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
@@ -259,6 +532,7 @@
                                     <jlinkImageName>app-linux</jlinkImageName>
                                     <jlinkZipName>app-linux</jlinkZipName>
                                     <jmodsPath>${linux.jmods.path}</jmodsPath>
+                                    <builddir>${linux.dir}</builddir>
                                 </configuration>
                             </execution>
                         </executions>
@@ -269,18 +543,23 @@
 
         <profile>
             <id>dedrmgui-mac-resources</id>
+
             <activation>
                 <os>
                     <name>Mac OS X</name>
                 </os>
             </activation>
+
             <build>
                 <resources>
                     <resource>
                         <directory>${resources.dir}</directory>
-                        <excludes>
-                            <exclude>${all.icons.exclude}</exclude>
-                        </excludes>
+                        <includes>
+                            <include>${macos.icons.path}</include>
+                        </includes>
+                        <!--                        <excludes>-->
+                        <!--                            <exclude>${all.icons.path}</exclude>-->
+                        <!--                        </excludes>-->
                     </resource>
                 </resources>
             </build>
@@ -288,18 +567,23 @@
 
         <profile>
             <id>dedrmgui-win-resources</id>
+
             <activation>
                 <os>
                     <family>windows</family>
                 </os>
             </activation>
+
             <build>
                 <resources>
                     <resource>
                         <directory>${resources.dir}</directory>
-                        <excludes>
-                            <exclude>${macos.icons.exclude}</exclude>
-                        </excludes>
+                        <includes>
+                            <include>${all.icons.path}</include>
+                        </includes>
+                        <!--                        <excludes>-->
+                        <!--                            <exclude>${macos.icons.path}</exclude>-->
+                        <!--                        </excludes>-->
                     </resource>
                 </resources>
             </build>
@@ -307,17 +591,191 @@
 
         <profile>
             <id>dedrmgui-linux-resources</id>
+
             <activation>
                 <os>
                     <name>Linux</name>
                 </os>
             </activation>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <includes>
+                            <include>${all.icons.path}</include>
+                        </includes>
+                        <!--                        <excludes>-->
+                        <!--                            <exclude>${macos.icons.path}</exclude>-->
+                        <!--                        </excludes>-->
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-mac-aarch64-dir</id>
+
+            <!--                        <activation>-->
+            <!--                            <os>-->
+            <!--                                <name>Mac OS X</name>-->
+            <!--                                <arch>aarch64</arch>-->
+            <!--                            </os>-->
+            <!--                        </activation>-->
+
+            <build>
+                <directory>${mac.aarch64.dir}</directory>
+                <finalName>${mac.aarch64.finalname}</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-mac-dir</id>
+
+            <!--            <activation>-->
+            <!--                <os>-->
+            <!--                    <name>Mac OS X</name>-->
+            <!--                    <arch>x86_64</arch>-->
+            <!--                </os>-->
+            <!--            </activation>-->
+
+            <build>
+                <directory>${mac.dir}</directory>
+                <finalName>${mac.finalname}</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-win-dir</id>
+
+            <!--            <activation>-->
+            <!--                <os>-->
+            <!--                    <family>windows</family>-->
+            <!--                </os>-->
+            <!--            </activation>-->
+
+            <build>
+                <directory>${win.dir}</directory>
+                <finalName>${win.finalname}</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-linux-aarch64-dir</id>
+
+            <!--            <activation>-->
+            <!--                <os>-->
+            <!--                    <name>Linux</name>-->
+            <!--                    <arch>aarch64</arch>-->
+            <!--                </os>-->
+            <!--            </activation>-->
+
+            <build>
+                <directory>${linux.aarch64.dir}</directory>
+                <finalName>${linux.aarch64.finalname}</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-linux-dir</id>
+
+            <!--            <activation>-->
+            <!--                <os>-->
+            <!--                    <name>Linux</name>-->
+            <!--                    <arch>x86_64</arch>-->
+            <!--                </os>-->
+            <!--            </activation>-->
+
+            <build>
+                <directory>${linux.dir}</directory>
+                <finalName>${linux.finalname}</finalName>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-include-fonts</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <includes>
+                            <include>${fonts.path}</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-include-macos-icons</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <includes>
+                            <include>${macos.icons.path}</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-include-all-icons</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <includes>
+                            <include>${all.icons.path}</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-exclude-fonts</id>
+
             <build>
                 <resources>
                     <resource>
                         <directory>${resources.dir}</directory>
                         <excludes>
-                            <exclude>${macos.icons.exclude}</exclude>
+                            <exclude>${fonts.path}</exclude>
+                        </excludes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-exclude-macos-icons</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <excludes>
+                            <exclude>${macos.icons.path}</exclude>
+                        </excludes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+
+        <profile>
+            <id>dedrmgui-exclude-all-icons</id>
+
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${resources.dir}</directory>
+                        <excludes>
+                            <exclude>${all.icons.path}</exclude>
                         </excludes>
                     </resource>
                 </resources>

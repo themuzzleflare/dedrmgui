@@ -5,6 +5,7 @@
 package cloud.tavitian.dedrmgui;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
@@ -48,10 +49,12 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     }
 
     public static SettingsDict loadFromFile(String filename) throws IOException {
-        return GSON.fromJson(new FileReader(filename), SettingsDict.class);
+        try (FileReader fileReader = new FileReader(filename)) {
+            return GSON.fromJson(fileReader, SettingsDict.class);
+        }
     }
 
-    public void writeToFile(File file) throws IOException {
+    public void writeToFile(@NotNull File file) throws IOException {
         writeToFile(file.getAbsolutePath());
     }
 
