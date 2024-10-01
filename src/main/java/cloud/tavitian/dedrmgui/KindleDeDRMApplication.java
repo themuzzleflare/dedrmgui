@@ -19,7 +19,7 @@ public final class KindleDeDRMApplication extends Application {
 
     @Override
     public void start(@NotNull Stage primaryStage) {
-        Util.setSystemMenuBar();
+        Util.setMacOSIntelMenuBar();
 
         Pane rootPane = CONTROLLER.getRootPane();
         Scene scene = new Scene(rootPane);

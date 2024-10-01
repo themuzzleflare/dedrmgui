@@ -38,6 +38,4 @@ build/
 .DS_Store
 
 ### Other ###
-jpackage-scripts/
-jlink-scripts/
-notarytool-scripts/
+scripts/
