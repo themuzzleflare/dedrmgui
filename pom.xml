@@ -32,6 +32,8 @@
         <macos.icons.path>**/${root.icons.path}/${root.macos.icons.path}/**</macos.icons.path>
         <all.icons.path>**/${root.icons.path}/${root.all.icons.path}/**</all.icons.path>
 
+        <kindlededrm.fxml.path>**/kindlededrm-view.fxml</kindlededrm.fxml.path>
+
         <mac.aarch64.dir>${project.build.directory}/mac-aarch64</mac.aarch64.dir>
         <mac.dir>${project.build.directory}/mac</mac.dir>
         <win.dir>${project.build.directory}/win</win.dir>
@@ -74,6 +76,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>cloud.tavitian</groupId>
             <artifactId>nsmenufx</artifactId>
         </dependency>
@@ -90,6 +97,7 @@
                 <directory>${resources.dir}</directory>
                 <includes>
                     <include>${fonts.path}</include>
+                    <include>${kindlededrm.fxml.path}</include>
                 </includes>
             </resource>
         </resources>
@@ -186,6 +194,8 @@
                                             <directory>${resources.dir}</directory>
                                             <includes>
                                                 <include>${macos.icons.path}</include>
+                                                <include>${fonts.path}</include>
+                                                <include>${kindlededrm.fxml.path}</include>
                                             </includes>
                                             <excludes>
                                                 <exclude>${all.icons.path}</exclude>
@@ -267,6 +277,8 @@
                                             <directory>${resources.dir}</directory>
                                             <includes>
                                                 <include>${macos.icons.path}</include>
+                                                <include>${fonts.path}</include>
+                                                <include>${kindlededrm.fxml.path}</include>
                                             </includes>
                                             <excludes>
                                                 <exclude>${all.icons.path}</exclude>
@@ -347,6 +359,8 @@
                                             <directory>${resources.dir}</directory>
                                             <includes>
                                                 <include>${all.icons.path}</include>
+                                                <include>${fonts.path}</include>
+                                                <include>${kindlededrm.fxml.path}</include>
                                             </includes>
                                             <excludes>
                                                 <exclude>${macos.icons.path}</exclude>
@@ -373,6 +387,8 @@
                                     <jlinkZipName>app-win</jlinkZipName>
                                     <jmodsPath>${win.jmods.path}</jmodsPath>
                                     <builddir>${win.dir}</builddir>
+                                    <basedir>${project.basedir}</basedir>
+                                    <launcher>app</launcher>
                                 </configuration>
                             </execution>
                         </executions>
@@ -427,6 +443,8 @@
                                             <directory>${resources.dir}</directory>
                                             <includes>
                                                 <include>${all.icons.path}</include>
+                                                <include>${fonts.path}</include>
+                                                <include>${kindlededrm.fxml.path}</include>
                                             </includes>
                                             <excludes>
                                                 <exclude>${macos.icons.path}</exclude>
@@ -507,6 +525,8 @@
                                             <directory>${resources.dir}</directory>
                                             <includes>
                                                 <include>${all.icons.path}</include>
+                                                <include>${fonts.path}</include>
+                                                <include>${kindlededrm.fxml.path}</include>
                                             </includes>
                                             <excludes>
                                                 <exclude>${macos.icons.path}</exclude>

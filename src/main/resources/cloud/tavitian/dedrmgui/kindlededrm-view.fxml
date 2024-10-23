@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~ Copyright © 2024 Paul Tavitian.
+  -->
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.util.Duration?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane" xmlns="http://javafx.com/javafx/23"
+           fx:controller="cloud.tavitian.dedrmgui.KindleDeDRMFXMLController" minWidth="532.0" minHeight="478.0">
+    <fx:define>
+        <Font fx:id="size12Font" size="12.0"/>
+        <Font fx:id="monospacedFont" name="Monospaced Regular"/>
+        <Insets fx:id="paddingInsets10" topRightBottomLeft="10.0"/>
+        <Insets fx:id="paddingInsets5" topRightBottomLeft="5.0"/>
+        <Duration fx:id="indefiniteDuration" fx:constant="INDEFINITE"/>
+        <Tooltip fx:id="generateKeyfileTooltip" showDelay="0s" hideDelay="0s"
+                 showDuration="$indefiniteDuration"
+                 text="Attempt to generate a key file based on the present installation of Kindle for PC/Mac."/>
+    </fx:define>
+
+    <VBox fx:id="rootVBoxWithMenuBar">
+        <MenuBar fx:id="menuBar" useSystemMenuBar="true">
+            <Menu fx:id="runMenu" text="Run">
+                <MenuItem fx:id="decryptMenuItem" accelerator="Shortcut+D" onAction="#decryptBookThrowing"
+                          text="Decrypt"/>
+                <MenuItem fx:id="generateKeyfileMenuItem" accelerator="Shortcut+K" onAction="#generateKeyfileThrowing"
+                          text="Generate Keyfile"/>
+                <MenuItem fx:id="clearLogsMenuItem" accelerator="Shortcut+L" onAction="#clearLogs" text="Clear Logs"/>
+            </Menu>
+
+            <Menu fx:id="settingsMenu" text="Settings">
+                <MenuItem fx:id="saveSettingsMenuItem" accelerator="Shortcut+S" onAction="#saveSettings"
+                          text="Save Settings"/>
+                <MenuItem fx:id="loadSettingsMenuItem" accelerator="Shortcut+O" onAction="#loadSettings"
+                          text="Load Settings"/>
+                <MenuItem fx:id="resetSettingsMenuItem" accelerator="Shortcut+R" onAction="#resetSettings"
+                          text="Reset Settings"/>
+            </Menu>
+        </MenuBar>
+
+        <VBox fx:id="rootVBox" spacing="20.0" VBox.vgrow="ALWAYS" padding="$paddingInsets10">
+            <VBox fx:id="inputOutputVBox" alignment="CENTER" spacing="5.0" padding="$paddingInsets5"
+                  style="-fx-border-color: darkgrey; -fx-border-style: solid; -fx-border-radius: 5.0; -fx-border-width: 1.0">
+                <HBox fx:id="ebookfileHBox" alignment="CENTER" spacing="5.0">
+                    <Label fx:id="ebookfileLabel" text="eBook File"/>
+                    <TextField fx:id="ebookfileTextField" promptText="eBook File" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="selectEbookfileButton" onAction="#selectEbookfile" text="Select"/>
+                </HBox>
+
+                <HBox fx:id="outputdirHBox" alignment="CENTER" spacing="5.0">
+                    <Label fx:id="outputdirLabel" text="Output Directory"/>
+                    <TextField fx:id="outputdirTextField" promptText="Output Directory" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="selectOutputdirButton" onAction="#selectOutputdir" text="Select"/>
+                    <Button fx:id="deriveOutputdirButton" onAction="#deriveOutputdir" text="Derive"/>
+                </HBox>
+            </VBox>
+
+            <VBox fx:id="keySerialVBox" alignment="CENTER" spacing="5.0" padding="$paddingInsets5"
+                  style="-fx-border-color: darkgrey; -fx-border-style: solid; -fx-border-radius: 5.0; -fx-border-width: 1.0">
+                <HBox fx:id="keyfileHBox" alignment="CENTER" spacing="5.0">
+                    <Label fx:id="keyfileLabel" text="Key File"/>
+                    <TextField fx:id="keyfileTextField" promptText=".k4i File" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="selectKeyfileButton" onAction="#selectKeyfile" text="Select"/>
+                    <Button fx:id="generateKeyfileButton" onAction="#generateKeyfileThrowing" text="Generate"
+                            tooltip="$generateKeyfileTooltip"/>
+                </HBox>
+
+                <HBox fx:id="serialHBox" alignment="CENTER" spacing="5.0">
+                    <Label fx:id="serialLabel" text="Serial"/>
+                    <TextField fx:id="serialTextField" promptText="Kindle Serial Number" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+                <Label fx:id="keyOrSerialRequiredLabel" alignment="CENTER"
+                       text="Either a Key File or Serial Number must be provided." font="$size12Font"/>
+            </VBox>
+
+            <HBox fx:id="settingsHBox" alignment="CENTER" spacing="5.0">
+                <Button fx:id="saveSettingsButton" onAction="#saveSettings" text="Save Settings"/>
+                <Button fx:id="loadSettingsButton" onAction="#loadSettings" text="Load Settings"/>
+                <Button fx:id="resetSettingsButton" cancelButton="true" onAction="#resetSettings" text="Reset"/>
+            </HBox>
+
+            <VBox fx:id="consoleDecryptVBox" spacing="5.0" VBox.vgrow="ALWAYS">
+                <TextArea fx:id="consoleOutputTextArea" editable="false" promptText="Console Output" wrapText="true"
+                          VBox.vgrow="ALWAYS" font="$monospacedFont"/>
+
+                <HBox fx:id="decryptVerboseClearLogsHBox" alignment="CENTER" spacing="5.0">
+                    <HBox fx:id="decryptVerboseHBox" alignment="CENTER" spacing="5.0">
+                        <Button fx:id="decryptButton" onAction="#decryptBookThrowing" text="Decrypt"/>
+                        <CheckBox fx:id="verboseCheckbox" onAction="#toggleVerbose" text="Verbose"/>
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <Button fx:id="clearLogsButton" cancelButton="true" onAction="#clearLogs" text="Clear Logs"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </VBox>
+
+    <Rectangle fx:id="semiTransparentOverlay" fill="black" opacity="0.5" width="${rootStackPane.width}"
+               height="${rootStackPane.height}" visible="false" managed="false"/>
+
+    <ProgressIndicator fx:id="progressIndicator" visible="false" managed="false"/>
+
+</StackPane>

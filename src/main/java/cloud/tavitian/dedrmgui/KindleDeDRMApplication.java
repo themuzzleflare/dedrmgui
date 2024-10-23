@@ -5,24 +5,38 @@
 package cloud.tavitian.dedrmgui;
 
 import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Closeable;
+import java.io.IOException;
+
 public final class KindleDeDRMApplication extends Application {
-    private static final KindleDeDRMController CONTROLLER = new KindleDeDRMController();
+    private Closeable controller;
 
     public static void main(String[] args) {
         launch(args);
     }
 
     @Override
-    public void start(@NotNull Stage primaryStage) {
-        Util.setMacOSIntelMenuBar();
+    public void start(@NotNull Stage primaryStage) throws IOException {
+        Util.setSystemMenuBar();
 
-        Pane rootPane = CONTROLLER.getRootPane();
-        Scene scene = new Scene(rootPane);
+        Scene scene;
+
+        if (Util.isUsingFXML()) {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("kindlededrm-view.fxml"));
+            scene = new Scene(fxmlLoader.load());
+            controller = fxmlLoader.getController();
+        } else {
+            KindleDeDRMController controller = new KindleDeDRMController();
+            Pane rootPane = controller.getRootPane();
+            scene = new Scene(rootPane);
+            this.controller = controller;
+        }
 
         primaryStage.setTitle(Util.getAppName());
         primaryStage.getIcons().addAll(Util.getAllIconImages());
@@ -34,7 +48,7 @@ public final class KindleDeDRMApplication extends Application {
 
     @Override
     public void stop() throws Exception {
-        CONTROLLER.close();
+        if (controller != null) controller.close();
         super.stop();
     }
 }

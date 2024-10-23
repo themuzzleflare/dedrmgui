@@ -11,6 +11,7 @@ import cloud.tavitian.nsmenufx.icns.IcnsType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -22,11 +23,12 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 final class Util {
-    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
-    private static final String OS_ARCH = System.getProperty("os.arch").toLowerCase();
+    private static final String OS_NAME = System.getProperty("os.name", "unknown").toLowerCase();
+    private static final String OS_ARCH = System.getProperty("os.arch", "x86_64").toLowerCase();
     private static final String APP_NAME = "Kindle DeDRM";
     private static final String APP_DESCRIPTION = "Remove DRM from Amazon Kindle eBooks";
     private static final String APP_COPYRIGHT = "Copyright © 2024 Paul Tavitian";
+    private static final Color ACCENT_COLOUR = Color.rgb(255, 153, 0);
     private static final String APP_VERSION = "8.0.0";
     private static final String ROOT_ICONS_PATH = "icons";
     private static final String ROOT_FONTS_PATH = "fonts";
@@ -36,6 +38,7 @@ final class Util {
     private static final Font INPUT_MONO_FONT = Font.loadFont(Util.class.getResourceAsStream(String.format("%s/%s", ROOT_FONTS_PATH, INPUT_MONO_FONT_FILENAME)), 12);
     private static final int[] STANDARD_ICON_SIZES = {16, 32, 128, 256, 512};
     private static final int[] RETINA_ICON_SIZES = {16, 32, 128, 256, 512};
+    private static final boolean USING_FXML = true;
     private static final MenuToolkit MENU_TOOLKIT = MenuToolkit.toolkit();
 
     private Util() {
@@ -55,6 +58,15 @@ final class Util {
 
     public static String getAppVersion() {
         return APP_VERSION;
+    }
+
+    @SuppressWarnings("unused")
+    public static Color getAccentColour() {
+        return ACCENT_COLOUR;
+    }
+
+    public static boolean isUsingFXML() {
+        return USING_FXML;
     }
 
     private static boolean isMacOS() {
@@ -209,7 +221,7 @@ final class Util {
 
     public static Font consoleOutputFont() {
         if (INPUT_MONO_FONT == null) {
-            return Font.font("Monospaced", 12);
+            return Font.font("Monospaced");
         }
 
         return INPUT_MONO_FONT;
