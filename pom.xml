@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright © 2024 Paul Tavitian.
+  ~ Copyright © 2024-2025 Paul Tavitian.
   -->
 
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -11,7 +11,7 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>8.0.0</version>
+        <version>10.0.0</version>
     </parent>
 
     <artifactId>dedrmgui</artifactId>
@@ -52,8 +52,8 @@
         <linux.aarch64.classes.dir>${linux.aarch64.dir}/classes</linux.aarch64.classes.dir>
         <linux.classes.dir>${linux.dir}/classes</linux.classes.dir>
 
-        <java.jdks.path>${user.home}/Java JDKs</java.jdks.path>
-        <jmods.path>${user.home}/jmods</jmods.path>
+        <java.jdks.path>${user.home}/Java Resources/Java JDKs</java.jdks.path>
+        <jmods.path>${user.home}/Java Resources/jmods</jmods.path>
 
         <mac.aarch64.jlink.executable>
             ${java.jdks.path}/${java.version}/macOS/aarch64/jdk-${java.version}.jdk/Contents/Home/bin/jlink

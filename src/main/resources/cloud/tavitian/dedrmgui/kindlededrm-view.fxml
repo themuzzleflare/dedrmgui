@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~ Copyright © 2024 Paul Tavitian.
+  ~ Copyright © 2024-2025 Paul Tavitian.
   -->
 
 <?import javafx.geometry.Insets?>
@@ -10,7 +10,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 <?import javafx.util.Duration?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane" xmlns="http://javafx.com/javafx/23"
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane" xmlns="http://javafx.com/javafx/24"
            fx:controller="cloud.tavitian.dedrmgui.KindleDeDRMFXMLController" minWidth="532.0" minHeight="478.0">
     <fx:define>
         <Font fx:id="size12Font" size="12.0"/>

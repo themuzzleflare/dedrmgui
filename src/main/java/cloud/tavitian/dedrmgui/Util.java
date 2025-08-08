@@ -1,5 +1,5 @@
 /*
- * Copyright © 2024 Paul Tavitian.
+ * Copyright © 2024-2025 Paul Tavitian.
  */
 
 package cloud.tavitian.dedrmgui;
@@ -27,9 +27,9 @@ final class Util {
     private static final String OS_ARCH = System.getProperty("os.arch", "x86_64").toLowerCase();
     private static final String APP_NAME = "Kindle DeDRM";
     private static final String APP_DESCRIPTION = "Remove DRM from Amazon Kindle eBooks";
-    private static final String APP_COPYRIGHT = "Copyright © 2024 Paul Tavitian";
+    private static final String APP_COPYRIGHT = "Copyright © 2024-2025 Paul Tavitian";
     private static final Color ACCENT_COLOUR = Color.rgb(255, 153, 0);
-    private static final String APP_VERSION = "8.0.0";
+    private static final String APP_VERSION = "10.0.0";
     private static final String ROOT_ICONS_PATH = "icons";
     private static final String ROOT_FONTS_PATH = "fonts";
     private static final String MACOS_ICONS_PATH = "macos";
