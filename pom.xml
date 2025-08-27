@@ -11,7 +11,7 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>10.0.0</version>
+        <version>12.0.0</version>
     </parent>
 
     <artifactId>dedrmgui</artifactId>
@@ -55,18 +55,14 @@
         <java.jdks.path>${user.home}/Java Resources/Java JDKs</java.jdks.path>
         <jmods.path>${user.home}/Java Resources/jmods</jmods.path>
 
-        <mac.aarch64.jlink.executable>
-            ${java.jdks.path}/${java.version}/macOS/aarch64/jdk-${java.version}.jdk/Contents/Home/bin/jlink
-        </mac.aarch64.jlink.executable>
-        <mac.jlink.executable>
-            ${java.jdks.path}/${java.version}/macOS/x64/jdk-${java.version}.jdk/Contents/Home/bin/jlink
-        </mac.jlink.executable>
+        <mac.aarch64.jlink.executable>${java.jdks.path}/${specific.java.version}/macOS/aarch64/jdk-${specific.java.version}.jdk/Contents/Home/bin/jlink</mac.aarch64.jlink.executable>
+        <mac.jlink.executable>${java.jdks.path}/${specific.java.version}/macOS/x64/jdk-${specific.java.version}.jdk/Contents/Home/bin/jlink</mac.jlink.executable>
 
-        <mac.aarch64.jmods.path>${jmods.path}/${java.version}/mac-aarch64</mac.aarch64.jmods.path>
-        <mac.jmods.path>${jmods.path}/${java.version}/mac</mac.jmods.path>
-        <win.jmods.path>${jmods.path}/${java.version}/win</win.jmods.path>
-        <linux.aarch64.jmods.path>${jmods.path}/${java.version}/linux-aarch64</linux.aarch64.jmods.path>
-        <linux.jmods.path>${jmods.path}/${java.version}/linux</linux.jmods.path>
+        <mac.aarch64.jmods.path>${jmods.path}/${specific.java.version}/mac-aarch64</mac.aarch64.jmods.path>
+        <mac.jmods.path>${jmods.path}/${specific.java.version}/mac</mac.jmods.path>
+        <win.jmods.path>${jmods.path}/${specific.java.version}/win</win.jmods.path>
+        <linux.aarch64.jmods.path>${jmods.path}/${specific.java.version}/linux-aarch64</linux.aarch64.jmods.path>
+        <linux.jmods.path>${jmods.path}/${specific.java.version}/linux</linux.jmods.path>
     </properties>
 
     <dependencies>
@@ -577,9 +573,6 @@
                         <includes>
                             <include>${macos.icons.path}</include>
                         </includes>
-                        <!--                        <excludes>-->
-                        <!--                            <exclude>${all.icons.path}</exclude>-->
-                        <!--                        </excludes>-->
                     </resource>
                 </resources>
             </build>
@@ -601,9 +594,6 @@
                         <includes>
                             <include>${all.icons.path}</include>
                         </includes>
-                        <!--                        <excludes>-->
-                        <!--                            <exclude>${macos.icons.path}</exclude>-->
-                        <!--                        </excludes>-->
                     </resource>
                 </resources>
             </build>
@@ -625,182 +615,11 @@
                         <includes>
                             <include>${all.icons.path}</include>
                         </includes>
-                        <!--                        <excludes>-->
-                        <!--                            <exclude>${macos.icons.path}</exclude>-->
-                        <!--                        </excludes>-->
                     </resource>
                 </resources>
             </build>
         </profile>
 
-        <profile>
-            <id>dedrmgui-mac-aarch64-dir</id>
-
-            <!--                        <activation>-->
-            <!--                            <os>-->
-            <!--                                <name>Mac OS X</name>-->
-            <!--                                <arch>aarch64</arch>-->
-            <!--                            </os>-->
-            <!--                        </activation>-->
-
-            <build>
-                <directory>${mac.aarch64.dir}</directory>
-                <finalName>${mac.aarch64.finalname}</finalName>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-mac-dir</id>
-
-            <!--            <activation>-->
-            <!--                <os>-->
-            <!--                    <name>Mac OS X</name>-->
-            <!--                    <arch>x86_64</arch>-->
-            <!--                </os>-->
-            <!--            </activation>-->
-
-            <build>
-                <directory>${mac.dir}</directory>
-                <finalName>${mac.finalname}</finalName>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-win-dir</id>
-
-            <!--            <activation>-->
-            <!--                <os>-->
-            <!--                    <family>windows</family>-->
-            <!--                </os>-->
-            <!--            </activation>-->
-
-            <build>
-                <directory>${win.dir}</directory>
-                <finalName>${win.finalname}</finalName>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-linux-aarch64-dir</id>
-
-            <!--            <activation>-->
-            <!--                <os>-->
-            <!--                    <name>Linux</name>-->
-            <!--                    <arch>aarch64</arch>-->
-            <!--                </os>-->
-            <!--            </activation>-->
-
-            <build>
-                <directory>${linux.aarch64.dir}</directory>
-                <finalName>${linux.aarch64.finalname}</finalName>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-linux-dir</id>
-
-            <!--            <activation>-->
-            <!--                <os>-->
-            <!--                    <name>Linux</name>-->
-            <!--                    <arch>x86_64</arch>-->
-            <!--                </os>-->
-            <!--            </activation>-->
-
-            <build>
-                <directory>${linux.dir}</directory>
-                <finalName>${linux.finalname}</finalName>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-include-fonts</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <includes>
-                            <include>${fonts.path}</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-include-macos-icons</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <includes>
-                            <include>${macos.icons.path}</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-include-all-icons</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <includes>
-                            <include>${all.icons.path}</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-exclude-fonts</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <excludes>
-                            <exclude>${fonts.path}</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-exclude-macos-icons</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <excludes>
-                            <exclude>${macos.icons.path}</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-exclude-all-icons</id>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <excludes>
-                            <exclude>${all.icons.path}</exclude>
-                        </excludes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
     </profiles>
 
 </project>

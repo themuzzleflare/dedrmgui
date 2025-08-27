@@ -29,7 +29,7 @@ final class Util {
     private static final String APP_DESCRIPTION = "Remove DRM from Amazon Kindle eBooks";
     private static final String APP_COPYRIGHT = "Copyright © 2024-2025 Paul Tavitian";
     private static final Color ACCENT_COLOUR = Color.rgb(255, 153, 0);
-    private static final String APP_VERSION = "10.0.0";
+    private static final String APP_VERSION = "12.0.0";
     private static final String ROOT_ICONS_PATH = "icons";
     private static final String ROOT_FONTS_PATH = "fonts";
     private static final String MACOS_ICONS_PATH = "macos";
