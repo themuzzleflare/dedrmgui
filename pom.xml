@@ -11,7 +11,7 @@
     <parent>
         <groupId>cloud.tavitian</groupId>
         <artifactId>kindlededrm</artifactId>
-        <version>12.0.0</version>
+        <version>13.0.0</version>
     </parent>
 
     <artifactId>dedrmgui</artifactId>
@@ -37,20 +37,14 @@
         <mac.aarch64.dir>${project.build.directory}/mac-aarch64</mac.aarch64.dir>
         <mac.dir>${project.build.directory}/mac</mac.dir>
         <win.dir>${project.build.directory}/win</win.dir>
-        <linux.aarch64.dir>${project.build.directory}/linux-aarch64</linux.aarch64.dir>
-        <linux.dir>${project.build.directory}/linux</linux.dir>
 
         <mac.aarch64.finalname>${project.artifactId}-${project.version}-mac-aarch64</mac.aarch64.finalname>
         <mac.finalname>${project.artifactId}-${project.version}-mac</mac.finalname>
         <win.finalname>${project.artifactId}-${project.version}-win</win.finalname>
-        <linux.aarch64.finalname>${project.artifactId}-${project.version}-linux-aarch64</linux.aarch64.finalname>
-        <linux.finalname>${project.artifactId}-${project.version}-linux</linux.finalname>
 
         <mac.aarch64.classes.dir>${mac.aarch64.dir}/classes</mac.aarch64.classes.dir>
         <mac.classes.dir>${mac.dir}/classes</mac.classes.dir>
         <win.classes.dir>${win.dir}/classes</win.classes.dir>
-        <linux.aarch64.classes.dir>${linux.aarch64.dir}/classes</linux.aarch64.classes.dir>
-        <linux.classes.dir>${linux.dir}/classes</linux.classes.dir>
 
         <java.jdks.path>${user.home}/Java Resources/Java JDKs</java.jdks.path>
         <jmods.path>${user.home}/Java Resources/jmods</jmods.path>
@@ -61,8 +55,6 @@
         <mac.aarch64.jmods.path>${jmods.path}/${specific.java.version}/mac-aarch64</mac.aarch64.jmods.path>
         <mac.jmods.path>${jmods.path}/${specific.java.version}/mac</mac.jmods.path>
         <win.jmods.path>${jmods.path}/${specific.java.version}/win</win.jmods.path>
-        <linux.aarch64.jmods.path>${jmods.path}/${specific.java.version}/linux-aarch64</linux.aarch64.jmods.path>
-        <linux.jmods.path>${jmods.path}/${specific.java.version}/linux</linux.jmods.path>
     </properties>
 
     <dependencies>
@@ -130,6 +122,9 @@
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
                 <configuration>
+                    <options>
+                        <option>--enable-native-access=javafx.graphics,com.sun.jna</option>
+                    </options>
                     <mainClass>dedrmgui/cloud.tavitian.dedrmgui.KindleDeDRMApplication</mainClass>
                     <jlinkZipName>app</jlinkZipName>
                     <jlinkImageName>app</jlinkImageName>
@@ -394,170 +389,6 @@
         </profile>
 
         <profile>
-            <id>dedrmgui-linuxaarch64-jlink</id>
-
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>aarch64</arch>
-                </os>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>compile-linux-aarch64</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${linux.aarch64.classes.dir}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-linux-aarch64-resources</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${linux.aarch64.classes.dir}</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${resources.dir}</directory>
-                                            <includes>
-                                                <include>${all.icons.path}</include>
-                                                <include>${fonts.path}</include>
-                                                <include>${kindlededrm.fxml.path}</include>
-                                            </includes>
-                                            <excludes>
-                                                <exclude>${macos.icons.path}</exclude>
-                                            </excludes>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.openjfx</groupId>
-                        <artifactId>javafx-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>jlink-linux-aarch64</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jlink</goal>
-                                </goals>
-                                <configuration>
-                                    <jlinkImageName>app-linux-aarch64</jlinkImageName>
-                                    <jlinkZipName>app-linux-aarch64</jlinkZipName>
-                                    <jmodsPath>${linux.aarch64.jmods.path}</jmodsPath>
-                                    <builddir>${linux.aarch64.dir}</builddir>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-linux-jlink</id>
-
-            <activation>
-                <os>
-                    <name>Linux</name>
-                    <arch>x86_64</arch>
-                </os>
-            </activation>
-
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>compile-linux</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${linux.classes.dir}</outputDirectory>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>copy-linux-resources</id>
-                                <phase>process-resources</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${linux.classes.dir}</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>${resources.dir}</directory>
-                                            <includes>
-                                                <include>${all.icons.path}</include>
-                                                <include>${fonts.path}</include>
-                                                <include>${kindlededrm.fxml.path}</include>
-                                            </includes>
-                                            <excludes>
-                                                <exclude>${macos.icons.path}</exclude>
-                                            </excludes>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-
-                    <plugin>
-                        <groupId>org.openjfx</groupId>
-                        <artifactId>javafx-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>jlink-linux</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jlink</goal>
-                                </goals>
-                                <configuration>
-                                    <jlinkImageName>app-linux</jlinkImageName>
-                                    <jlinkZipName>app-linux</jlinkZipName>
-                                    <jmodsPath>${linux.jmods.path}</jmodsPath>
-                                    <builddir>${linux.dir}</builddir>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
             <id>dedrmgui-mac-resources</id>
 
             <activation>
@@ -584,27 +415,6 @@
             <activation>
                 <os>
                     <family>windows</family>
-                </os>
-            </activation>
-
-            <build>
-                <resources>
-                    <resource>
-                        <directory>${resources.dir}</directory>
-                        <includes>
-                            <include>${all.icons.path}</include>
-                        </includes>
-                    </resource>
-                </resources>
-            </build>
-        </profile>
-
-        <profile>
-            <id>dedrmgui-linux-resources</id>
-
-            <activation>
-                <os>
-                    <name>Linux</name>
                 </os>
             </activation>
 

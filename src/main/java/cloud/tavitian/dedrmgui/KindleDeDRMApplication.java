@@ -17,6 +17,7 @@ import java.io.IOException;
 public final class KindleDeDRMApplication extends Application {
     private Closeable controller;
 
+    @SuppressWarnings("unused")
     public static void main(String[] args) {
         launch(args);
     }
