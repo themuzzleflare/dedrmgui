@@ -5,6 +5,7 @@
 package cloud.tavitian.dedrmgui;
 
 import com.google.gson.Gson;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -26,7 +27,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         super();
     }
 
-    public SettingsDict(File file) throws IOException {
+    public SettingsDict(@NotNull File file) throws IOException {
         this(file.getAbsolutePath());
     }
 
@@ -44,7 +45,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
     }
 
     @SuppressWarnings("unused")
-    public static SettingsDict loadFromFile(File file) throws IOException {
+    public static SettingsDict loadFromFile(@NotNull File file) throws IOException {
         return loadFromFile(file.getAbsolutePath());
     }
 
@@ -68,6 +69,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         return get(INPUTFILE_KEY);
     }
 
+    @Contract(mutates = "this")
     public void setInputFile(String inputFile) {
         put(INPUTFILE_KEY, inputFile);
     }
@@ -76,6 +78,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         return get(OUTPUTFILE_KEY);
     }
 
+    @Contract(mutates = "this")
     public void setOutputFile(String outputFile) {
         put(OUTPUTFILE_KEY, outputFile);
     }
@@ -84,6 +87,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         return get(KEYFILE_KEY);
     }
 
+    @Contract(mutates = "this")
     public void setKeyFile(String keyFile) {
         put(KEYFILE_KEY, keyFile);
     }
@@ -92,6 +96,7 @@ final class SettingsDict extends LinkedHashMap<String, String> {
         return get(SERIAL_KEY);
     }
 
+    @Contract(mutates = "this")
     public void setSerial(String serial) {
         put(SERIAL_KEY, serial);
     }

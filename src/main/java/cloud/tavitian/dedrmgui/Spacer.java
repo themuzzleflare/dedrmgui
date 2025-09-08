@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.jetbrains.annotations.NotNull;
 
 final class Spacer extends Region {
     /**
@@ -25,7 +26,7 @@ final class Spacer extends Region {
      *
      * @param orientation The orientation of the spacer.
      */
-    public Spacer(Orientation orientation) {
+    public Spacer(@NotNull Orientation orientation) {
         super();
 
         switch (orientation) {
@@ -50,7 +51,7 @@ final class Spacer extends Region {
      * @param size        The size of the spacer.
      * @param orientation The orientation of the spacer.
      */
-    public Spacer(double size, Orientation orientation) {
+    public Spacer(double size, @NotNull Orientation orientation) {
         super();
 
         switch (orientation) {

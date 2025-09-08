@@ -14,6 +14,9 @@ import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +32,7 @@ final class Util {
     private static final String APP_DESCRIPTION = "Remove DRM from Amazon Kindle eBooks";
     private static final String APP_COPYRIGHT = "Copyright © 2024-2025 Paul Tavitian";
     private static final Color ACCENT_COLOUR = Color.rgb(255, 153, 0);
-    private static final String APP_VERSION = "13.0.0";
+    private static final String APP_VERSION = "14.0.0";
     private static final String ROOT_ICONS_PATH = "icons";
     private static final String ROOT_FONTS_PATH = "fonts";
     private static final String MACOS_ICONS_PATH = "macos";
@@ -41,48 +44,53 @@ final class Util {
     private static final boolean USING_FXML = true;
     private static final MenuToolkit MENU_TOOLKIT = MenuToolkit.toolkit();
 
+    @Contract(pure = true)
     private Util() {
     }
 
+    @Contract(pure = true)
     public static String getAppName() {
         return APP_NAME;
     }
 
+    @Contract(pure = true)
     public static String getAppDescription() {
         return APP_DESCRIPTION;
     }
 
+    @Contract(pure = true)
     public static String getAppCopyright() {
         return APP_COPYRIGHT;
     }
 
+    @Contract(pure = true)
     public static String getAppVersion() {
         return APP_VERSION;
     }
 
+    @Contract(pure = true)
     @SuppressWarnings("unused")
     public static Color getAccentColour() {
         return ACCENT_COLOUR;
     }
 
+    @Contract(pure = true)
     public static boolean isUsingFXML() {
         return USING_FXML;
     }
 
+    @Contract(pure = true)
     private static boolean isMacOS() {
         return OS_NAME.startsWith("mac");
     }
 
+    @Contract(pure = true)
     @SuppressWarnings("unused")
     private static boolean isWindows() {
         return OS_NAME.startsWith("win");
     }
 
-    @SuppressWarnings("unused")
-    private static boolean isLinux() {
-        return OS_NAME.startsWith("linux");
-    }
-
+    @Contract(pure = true)
     @SuppressWarnings("unused")
     private static boolean isIntel() {
         return OS_ARCH.equals("x86_64");
@@ -96,21 +104,23 @@ final class Util {
         return isArm();
     }
 
-    private static String getStandardIconFilename(int size) {
+    @Contract(pure = true)
+    private static @NotNull String getStandardIconFilename(int size) {
         return String.format("%dx%d.png", size, size);
     }
 
-    private static String[] getStandardIconFilenames() {
+    private static String @NotNull [] getStandardIconFilenames() {
         return Arrays.stream(STANDARD_ICON_SIZES)
                 .mapToObj(Util::getStandardIconFilename)
                 .toArray(String[]::new);
     }
 
-    private static String getRetinaIconFilename(int size) {
+    @Contract(pure = true)
+    private static @NotNull String getRetinaIconFilename(int size) {
         return String.format("%dx%d@2x.png", size, size);
     }
 
-    private static String[] getRetinaIconFilenames() {
+    private static String @NotNull [] getRetinaIconFilenames() {
         return Arrays.stream(RETINA_ICON_SIZES)
                 .mapToObj(Util::getRetinaIconFilename)
                 .toArray(String[]::new);
@@ -124,11 +134,12 @@ final class Util {
         }
     }
 
-    private static String[] getAllIconFilenames() {
+    private static String @NotNull [] getAllIconFilenames() {
         return Stream.concat(Arrays.stream(getStandardIconFilenames()), Arrays.stream(getRetinaIconFilenames()))
                 .toArray(String[]::new);
     }
 
+    @Contract(pure = true)
     private static String getIconsPathForOS() {
         if (isMacOS()) {
             return MACOS_ICONS_PATH;
@@ -155,14 +166,14 @@ final class Util {
         return Util.class.getResourceAsStream(String.format("%s/%s/%s", ROOT_ICONS_PATH, getIconsPathForOS(), filename));
     }
 
-    private static InputStream[] getAllIconInputStreams() {
+    private static InputStream @NotNull [] getAllIconInputStreams() {
         return Arrays.stream(getAllIconFilenames())
                 .map(Util::getIconInputStream)
                 .filter(Objects::nonNull)
                 .toArray(InputStream[]::new);
     }
 
-    public static Image[] getAllIconImages() {
+    public static Image @NotNull [] getAllIconImages() {
         return Arrays.stream(getAllIconInputStreams())
                 .filter(Objects::nonNull)
                 .map(Image::new)
@@ -176,7 +187,7 @@ final class Util {
         return getIconInputStream(largestSize);
     }
 
-    private static Image getLargestIconImage() {
+    private static @Nullable Image getLargestIconImage() {
         InputStream largestIconInputStream = getLargestIconInputStream();
 
         if (largestIconInputStream == null) {
@@ -186,11 +197,12 @@ final class Util {
         return new Image(largestIconInputStream);
     }
 
-    private static File getGenericApplicationIconFile() {
+    @Contract(value = " -> new", pure = true)
+    private static @NotNull File getGenericApplicationIconFile() {
         return new File("/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns");
     }
 
-    private static InputStream getGenericApplicationIconInputStream() {
+    private static @Nullable InputStream getGenericApplicationIconInputStream() {
         try {
             IcnsParser icnsParser = IcnsParser.forFile(getGenericApplicationIconFile());
             return icnsParser.getIconStream(IcnsType.ic09);
@@ -199,7 +211,7 @@ final class Util {
         }
     }
 
-    private static Image getGenericApplicationIconImage() {
+    private static @Nullable Image getGenericApplicationIconImage() {
         InputStream genericApplicationIconInputStream = getGenericApplicationIconInputStream();
 
         if (genericApplicationIconInputStream == null) {
@@ -238,7 +250,7 @@ final class Util {
                 .build();
     }
 
-    private static Menu createMacOSIntelApplicationMenu() {
+    private static @NotNull Menu createMacOSIntelApplicationMenu() {
         Menu applicationMenu = MENU_TOOLKIT.createDefaultApplicationMenu(getAppName());
         MenuItem aboutMenuItem = MENU_TOOLKIT.createNativeAboutMenuItem(getAppName());
         applicationMenu.getItems().set(0, aboutMenuItem);
@@ -249,7 +261,8 @@ final class Util {
         return MENU_TOOLKIT.createDefaultApplicationMenu(getAppName());
     }
 
-    private static Menu createCustomMacOSSiliconApplicationMenu() {
+    @Contract(" -> new")
+    private static @NotNull Menu createCustomMacOSSiliconApplicationMenu() {
         return MENU_TOOLKIT.createDefaultApplicationMenu(getAppName(), createCustomAboutStage());
     }
 

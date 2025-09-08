@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
+import org.jetbrains.annotations.Contract;
 
 import java.io.PrintStream;
 import java.net.URL;
@@ -339,6 +340,7 @@ final class KindleDeDRMController extends KindleDeDRMBaseController {
         HBox.setHgrow(ebookfileTextField, Priority.ALWAYS);
     }
 
+    @Contract(pure = true)
     public Pane getRootPane() {
         return rootStackPane;
     }
